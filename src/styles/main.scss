@@ -1,0 +1,55 @@
+$background-color: #0b100d;
+$surface-color: #182019;
+$text-color: #f0ead6;
+$accent-color: #9ee34f;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: $text-color;
+  background:
+    radial-gradient(circle at center, rgba($accent-color, 0.12), transparent 45%),
+    $background-color;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.app {
+  display: grid;
+  min-height: 100vh;
+  padding: 1rem;
+  place-content: center;
+  text-align: center;
+
+  &__title {
+    margin: 0;
+    color: $accent-color;
+    font-size: clamp(2rem, 8vw, 4.5rem);
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 1.5rem rgba($accent-color, 0.35);
+  }
+
+  &__description {
+    margin: 1rem 0 0;
+    color: rgba($text-color, 0.75);
+    font-size: clamp(1rem, 2vw, 1.25rem);
+  }
+}
