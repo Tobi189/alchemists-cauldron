@@ -19,8 +19,7 @@ body {
   margin: 0;
   color: $text-color;
   background:
-    radial-gradient(circle at center, rgba($accent-color, 0.12), transparent 45%),
-    $background-color;
+    radial-gradient(circle at center, rgba($accent-color, 0.12), transparent 45%), $background-color;
 }
 
 button,
