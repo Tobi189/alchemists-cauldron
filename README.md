@@ -13,6 +13,10 @@ target ranges before time, lives or ingredient stock runs out.
 - Supported browser: latest Google Chrome
 - Supported viewport width: **375px–1920px**
 
+## Deployment
+
+[Open the deployed application](https://tobi189.github.io/alchemists-cauldron/)
+
 ## Current implementation
 
 The project is currently in its technical-foundation stage.
@@ -31,7 +35,7 @@ Planned:
 - [ ] Level 1 — complete basic game
 - [ ] Level 2 — difficulty selection, saving and continuing
 - [ ] Level 3 — advanced controls, reactions and visual feedback
-- [ ] GitHub Pages deployment
+- [x] GitHub Pages deployment
 
 This section will be updated as each story is completed.
 
