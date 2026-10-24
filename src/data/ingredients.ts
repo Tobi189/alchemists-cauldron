@@ -66,3 +66,6 @@ export const INGREDIENTS = [
     magicPower: 0,
   },
 ] as const satisfies readonly Ingredient[];
+
+export const getIngredientById = (ingredientId: string): Ingredient | undefined =>
+  INGREDIENTS.find((ingredient) => ingredient.id === ingredientId);

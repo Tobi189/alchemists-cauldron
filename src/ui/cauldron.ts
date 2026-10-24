@@ -40,7 +40,11 @@ const createCauldronContents = (state: GameState): HTMLElement => {
   return contents;
 };
 
-export const createCauldron = (state: GameState, onStartGame: () => void): HTMLElement => {
+export const createCauldron = (
+  state: GameState,
+  onStartGame: () => void,
+  onBrew: () => void,
+): HTMLElement => {
   const section = document.createElement('section');
   const stage = document.createElement('div');
   const glow = document.createElement('div');
@@ -77,13 +81,29 @@ export const createCauldron = (state: GameState, onStartGame: () => void): HTMLE
     startButton.addEventListener('click', onStartGame);
     actions.append(startButton);
   } else {
+    const brewButton = document.createElement('button');
     const status = document.createElement('p');
+
+    brewButton.className = 'primary-action';
+    brewButton.type = 'button';
+    brewButton.textContent = 'Brew';
+    brewButton.disabled = count === 0 || state.status !== 'playing';
     status.className = 'cauldron-area__status';
-    status.textContent =
-      count === LEVEL_ONE_RULES.cauldronCapacity
-        ? 'Maximum capacity reached'
-        : 'Select an ingredient from the shelf';
-    actions.append(status);
+
+    if (state.lastBrewResult === 'success') {
+      status.classList.add('cauldron-area__status--success');
+      status.textContent = `Successful brew: +${LEVEL_ONE_RULES.scorePerBrew} points`;
+    } else if (state.lastBrewResult === 'failure') {
+      status.classList.add('cauldron-area__status--failure');
+      status.textContent = 'The mixture failed: one life lost';
+    } else if (count === LEVEL_ONE_RULES.cauldronCapacity) {
+      status.textContent = 'Maximum capacity reached';
+    } else {
+      status.textContent = 'Select an ingredient from the shelf';
+    }
+
+    brewButton.addEventListener('click', onBrew);
+    actions.append(brewButton, status);
   }
 
   section.append(stage, counter, actions);

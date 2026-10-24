@@ -14,7 +14,9 @@ export const addIngredient = (state: GameState, ingredientId: string): GameState
 
   return {
     ...state,
+    lastBrewResult: undefined,
     shelfStock: decreaseIngredientStock(state.shelfStock, ingredientId),
+    previousCauldronIngredientIds: state.cauldronIngredientIds,
     cauldronIngredientIds: [...state.cauldronIngredientIds, ingredientId],
   };
 };

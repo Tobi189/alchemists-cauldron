@@ -1,11 +1,13 @@
-import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import type { GameState } from '../types/game.ts';
 import { createCauldron } from './cauldron.ts';
+import { createParameterBars } from './parameter-bars.ts';
+import { createRecipePanel } from './recipe.ts';
 import { createShelf } from './shelf.ts';
 
 export interface AppHandlers {
   readonly onStartGame: () => void;
   readonly onAddIngredient: (ingredientId: string) => void;
+  readonly onBrew: () => void;
 }
 
 const formatTime = (totalSeconds: number): string => {
@@ -70,36 +72,6 @@ const createHeader = (state: GameState): HTMLElement => {
   return header;
 };
 
-const createRecipePanel = (state: GameState): HTMLElement => {
-  const panel = document.createElement('aside');
-  const eyebrow = document.createElement('p');
-  const title = document.createElement('h2');
-  const message = document.createElement('p');
-  const counter = document.createElement('p');
-  const count = state.cauldronIngredientIds.length;
-
-  panel.className = 'recipe-panel';
-  eyebrow.className = 'recipe-panel__eyebrow';
-  title.className = 'recipe-panel__title';
-  message.className = 'recipe-panel__message';
-  counter.className = 'recipe-panel__counter';
-  eyebrow.textContent = 'Current Recipe';
-  title.textContent = state.status === 'menu' ? 'The Grimoire Sleeps' : 'Unwritten Formula';
-  message.textContent =
-    state.status === 'menu'
-      ? 'Begin a new game to open the recipe book.'
-      : 'Recipe selection will be revealed in the next brewing step.';
-  counter.textContent = `Ingredients: ${count} / ${LEVEL_ONE_RULES.cauldronCapacity}`;
-
-  if (count === LEVEL_ONE_RULES.cauldronCapacity) {
-    counter.classList.add('recipe-panel__counter--full');
-  }
-
-  panel.append(eyebrow, title, message, counter);
-
-  return panel;
-};
-
 export const renderApp = (
   container: HTMLElement,
   state: GameState,
@@ -108,8 +80,9 @@ export const renderApp = (
   const shell = document.createElement('main');
   const board = document.createElement('div');
   const shelf = createShelf(state, handlers.onAddIngredient);
-  const cauldron = createCauldron(state, handlers.onStartGame);
+  const cauldron = createCauldron(state, handlers.onStartGame, handlers.onBrew);
   const recipe = createRecipePanel(state);
+  const parameterBars = createParameterBars(state);
   const footer = document.createElement('footer');
 
   shell.className = 'game-shell';
@@ -118,6 +91,6 @@ export const renderApp = (
   footer.textContent = 'Choose ingredients carefully. Every portion is spent.';
 
   board.append(shelf, cauldron, recipe);
-  shell.append(createHeader(state), board, footer);
+  shell.append(createHeader(state), board, parameterBars, footer);
   container.replaceChildren(shell);
 };
