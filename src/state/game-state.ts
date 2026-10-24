@@ -1,5 +1,6 @@
 import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
+import { selectRandomRecipe } from '../logic/recipe-generator.ts';
 import { createShelfStock } from '../logic/stock.ts';
 import type { GameState, RandomSource } from '../types/game.ts';
 
@@ -8,6 +9,7 @@ export const createMenuState = (): GameState => ({
   score: 0,
   timeLeft: 0,
   lives: 0,
+  activeRecipe: undefined,
   shelfStock: {},
   cauldronIngredientIds: [],
 });
@@ -17,6 +19,7 @@ export const createNewGameState = (random: RandomSource = Math.random): GameStat
   score: 0,
   timeLeft: LEVEL_ONE_RULES.startingTimeSeconds,
   lives: LEVEL_ONE_RULES.startingLives,
+  activeRecipe: selectRandomRecipe(LEVEL_ONE_RULES.difficulty, random),
   shelfStock: createShelfStock(INGREDIENTS, LEVEL_ONE_RULES.shelfSize, random),
   cauldronIngredientIds: [],
 });

@@ -50,6 +50,7 @@ export interface GameState {
   readonly score: number;
   readonly timeLeft: number;
   readonly lives: number;
+  readonly activeRecipe: Recipe | undefined;
   readonly shelfStock: ShelfStock;
   readonly cauldronIngredientIds: readonly string[];
 }
