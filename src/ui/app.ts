@@ -1,15 +1,123 @@
-export const renderApp = (container: HTMLElement): void => {
-  const main = document.createElement('main');
+import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
+import type { GameState } from '../types/game.ts';
+import { createCauldron } from './cauldron.ts';
+import { createShelf } from './shelf.ts';
+
+export interface AppHandlers {
+  readonly onStartGame: () => void;
+  readonly onAddIngredient: (ingredientId: string) => void;
+}
+
+const formatTime = (totalSeconds: number): string => {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+const createHudItem = (label: string, value: string): HTMLElement => {
+  const item = document.createElement('div');
+  const itemLabel = document.createElement('span');
+  const itemValue = document.createElement('strong');
+
+  item.className = 'hud__item';
+  itemLabel.className = 'hud__label';
+  itemValue.className = 'hud__value';
+  itemLabel.textContent = label;
+  itemValue.textContent = value;
+  item.append(itemLabel, itemValue);
+
+  return item;
+};
+
+const createHeader = (state: GameState): HTMLElement => {
+  const header = document.createElement('header');
+  const score = createHudItem('Score', String(state.score));
+  const titleGroup = document.createElement('div');
+  const eyebrow = document.createElement('span');
   const title = document.createElement('h1');
-  const description = document.createElement('p');
+  const time = createHudItem('Time', formatTime(state.timeLeft));
 
-  main.className = 'app';
-  title.className = 'app__title';
-  description.className = 'app__description';
-
+  header.className = 'game-header';
+  titleGroup.className = 'game-header__title-group';
+  eyebrow.className = 'game-header__eyebrow';
+  title.className = 'game-header__title';
+  eyebrow.textContent = 'The Arcane Workshop';
   title.textContent = "Alchemist's Cauldron";
-  description.textContent = 'Project setup in progress';
+  titleGroup.append(eyebrow, title);
 
-  main.append(title, description);
-  container.replaceChildren(main);
+  const rightHud = document.createElement('div');
+  rightHud.className = 'hud__right';
+  rightHud.append(time);
+
+  if (state.status !== 'menu') {
+    const lives = document.createElement('div');
+    const livesLabel = document.createElement('span');
+    const hearts = document.createElement('span');
+
+    lives.className = 'hud__lives';
+    livesLabel.className = 'visually-hidden';
+    hearts.className = 'hud__hearts';
+    livesLabel.textContent = 'Lives';
+    hearts.textContent = '♥'.repeat(state.lives);
+    hearts.setAttribute('aria-label', `${state.lives} lives remaining`);
+    lives.append(livesLabel, hearts);
+    rightHud.append(lives);
+  }
+
+  header.append(score, titleGroup, rightHud);
+
+  return header;
+};
+
+const createRecipePanel = (state: GameState): HTMLElement => {
+  const panel = document.createElement('aside');
+  const eyebrow = document.createElement('p');
+  const title = document.createElement('h2');
+  const message = document.createElement('p');
+  const counter = document.createElement('p');
+  const count = state.cauldronIngredientIds.length;
+
+  panel.className = 'recipe-panel';
+  eyebrow.className = 'recipe-panel__eyebrow';
+  title.className = 'recipe-panel__title';
+  message.className = 'recipe-panel__message';
+  counter.className = 'recipe-panel__counter';
+  eyebrow.textContent = 'Current Recipe';
+  title.textContent = state.status === 'menu' ? 'The Grimoire Sleeps' : 'Unwritten Formula';
+  message.textContent =
+    state.status === 'menu'
+      ? 'Begin a new game to open the recipe book.'
+      : 'Recipe selection will be revealed in the next brewing step.';
+  counter.textContent = `Ingredients: ${count} / ${LEVEL_ONE_RULES.cauldronCapacity}`;
+
+  if (count === LEVEL_ONE_RULES.cauldronCapacity) {
+    counter.classList.add('recipe-panel__counter--full');
+  }
+
+  panel.append(eyebrow, title, message, counter);
+
+  return panel;
+};
+
+export const renderApp = (
+  container: HTMLElement,
+  state: GameState,
+  handlers: AppHandlers,
+): void => {
+  const shell = document.createElement('main');
+  const board = document.createElement('div');
+  const shelf = createShelf(state, handlers.onAddIngredient);
+  const cauldron = createCauldron(state, handlers.onStartGame);
+  const recipe = createRecipePanel(state);
+  const footer = document.createElement('footer');
+
+  shell.className = 'game-shell';
+  board.className = 'game-board';
+  footer.className = 'game-footer';
+  footer.textContent = 'Choose ingredients carefully. Every portion is spent.';
+
+  board.append(shelf, cauldron, recipe);
+  shell.append(createHeader(state), board, footer);
+  container.replaceChildren(shell);
 };

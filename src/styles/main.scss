@@ -1,7 +1,17 @@
-$background-color: #0b100d;
-$surface-color: #182019;
-$text-color: #f0ead6;
-$accent-color: #9ee34f;
+$background: #070a08;
+$surface: #111712;
+$surface-light: #1a231a;
+$ink: #f4ead0;
+$muted-ink: #b8ae92;
+$gold: #c99d46;
+$gold-light: #f0d181;
+$magic: #9bea45;
+$magic-dark: #315b19;
+$temperature: #e45b3f;
+$density: #4aa9ec;
+$arcane: #b969e8;
+$parchment: #d9bd7a;
+$parchment-dark: #8b662f;
 
 *,
 *::before,
@@ -10,6 +20,7 @@ $accent-color: #9ee34f;
 }
 
 html {
+  min-width: 320px;
   color-scheme: dark;
   font-family: Georgia, 'Times New Roman', serif;
 }
@@ -17,9 +28,13 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  color: $text-color;
+  overflow-x: hidden;
+  color: $ink;
   background:
-    radial-gradient(circle at center, rgba($accent-color, 0.12), transparent 45%), $background-color;
+    radial-gradient(circle at 50% 35%, rgba($magic, 0.11), transparent 32rem),
+    radial-gradient(circle at 15% 15%, rgba($gold, 0.08), transparent 24rem),
+    linear-gradient(rgba(1, 4, 2, 0.7), rgba(1, 4, 2, 0.94)),
+    repeating-linear-gradient(90deg, #0b100c 0 4rem, #080c09 4rem 8rem);
 }
 
 button,
@@ -27,28 +42,716 @@ input {
   font: inherit;
 }
 
+button {
+  color: inherit;
+}
+
 #app {
   min-height: 100vh;
 }
 
-.app {
-  display: grid;
-  min-height: 100vh;
-  padding: 1rem;
-  place-content: center;
-  text-align: center;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
-  &__title {
-    margin: 0;
-    color: $accent-color;
-    font-size: clamp(2rem, 8vw, 4.5rem);
-    letter-spacing: 0.04em;
-    text-shadow: 0 0 1.5rem rgba($accent-color, 0.35);
+.game-shell {
+  width: min(100%, 1920px);
+  min-height: 100vh;
+  padding: clamp(0.5rem, 1.5vw, 1.5rem);
+  margin: 0 auto;
+}
+
+.game-header {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(18rem, 2fr) minmax(12rem, 1fr);
+  gap: 1rem;
+  align-items: center;
+  min-height: 6.5rem;
+  padding: 0.75rem clamp(0.75rem, 2vw, 1.75rem);
+  border: 1px solid rgba($gold, 0.65);
+  border-radius: 1rem 1rem 0.35rem 0.35rem;
+  background:
+    linear-gradient(135deg, rgba($gold, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(#1c211d, 0.97), rgba(#090d0a, 0.98));
+  box-shadow:
+    inset 0 0 0 3px rgba(#000, 0.55),
+    inset 0 -1rem 2rem rgba(#000, 0.35),
+    0 0.6rem 2rem rgba(#000, 0.45);
+}
+
+.game-header__title-group {
+  min-width: 0;
+  text-align: center;
+}
+
+.game-header__eyebrow {
+  display: block;
+  margin-bottom: 0.1rem;
+  color: $gold-light;
+  font-size: clamp(0.65rem, 1vw, 0.8rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.game-header__title {
+  margin: 0;
+  color: #d8f6a7;
+  font-size: clamp(1.65rem, 4vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.025em;
+  text-shadow:
+    0 0 0.4rem rgba($magic, 0.9),
+    0 0 1.4rem rgba($magic, 0.45),
+    0 2px #19320d;
+}
+
+.hud__item {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.hud__label {
+  color: $gold-light;
+  font-size: clamp(0.9rem, 1.6vw, 1.35rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hud__value {
+  color: $magic;
+  font-size: clamp(1.35rem, 2.4vw, 2.2rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 0.75rem rgba($magic, 0.42);
+}
+
+.hud__right {
+  display: flex;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.hud__lives {
+  min-width: 4.5rem;
+}
+
+.hud__hearts {
+  color: #f04435;
+  font-size: clamp(1.3rem, 2.4vw, 2rem);
+  letter-spacing: 0.08em;
+  text-shadow:
+    0 0 0.2rem #fff,
+    0 0 0.75rem rgba(#ed2a1a, 0.7);
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: minmax(15rem, 0.78fr) minmax(19rem, 1.35fr) minmax(16rem, 0.9fr);
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  align-items: stretch;
+  padding: clamp(0.75rem, 1.5vw, 1.5rem) 0;
+}
+
+.ingredient-shelf,
+.recipe-panel {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba($gold, 0.65);
+  box-shadow:
+    inset 0 0 0 3px rgba(#000, 0.55),
+    0 0.65rem 1.75rem rgba(#000, 0.42);
+}
+
+.ingredient-shelf {
+  padding: 0.75rem;
+  border-radius: 0.35rem 0.35rem 0.8rem 0.8rem;
+  background:
+    linear-gradient(90deg, rgba(#2a1709, 0.75), transparent 12% 88%, rgba(#2a1709, 0.75)),
+    repeating-linear-gradient(0deg, #17130d 0 4.6rem, #2c1b0c 4.6rem 4.85rem);
+}
+
+.panel-heading {
+  margin: 0 0 0.75rem;
+  padding: 0.55rem;
+  border: 1px solid rgba($gold, 0.72);
+  background: linear-gradient(#241a0d, #100d08);
+  color: $gold-light;
+  font-size: clamp(1rem, 1.6vw, 1.3rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ingredient-shelf__list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ingredient-card {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) 2.15rem;
+  gap: 0.55rem;
+  align-items: center;
+  width: 100%;
+  min-height: 4.35rem;
+  padding: 0.45rem;
+  border: 1px solid rgba($gold, 0.36);
+  border-radius: 0.35rem;
+  color: $ink;
+  text-align: left;
+  cursor: pointer;
+  background:
+    radial-gradient(circle at 15% 50%, rgba($magic, 0.08), transparent 35%),
+    linear-gradient(90deg, rgba(#080a08, 0.96), rgba(#17150f, 0.96));
+  transition:
+    border-color 160ms ease,
+    filter 160ms ease,
+    transform 160ms ease;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    border-color: $gold-light;
+    outline: none;
+    filter: brightness(1.16);
+    transform: translateX(0.18rem);
   }
 
-  &__description {
-    margin: 1rem 0 0;
-    color: rgba($text-color, 0.75);
-    font-size: clamp(1rem, 2vw, 1.25rem);
+  &:disabled:not(.ingredient-card--empty) {
+    cursor: not-allowed;
+    filter: saturate(0.45);
+    opacity: 0.62;
+  }
+}
+
+.ingredient-card--empty {
+  cursor: not-allowed;
+  opacity: 0.38;
+  grid-template-columns: minmax(0, 1fr) 2.15rem;
+}
+
+.ingredient-card__empty-message {
+  padding-left: 0.5rem;
+  color: $muted-ink;
+  font-size: 0.8rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ingredient-card__icon {
+  display: grid;
+  width: 2.85rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba($magic, 0.48);
+  border-radius: 50% 50% 45% 45%;
+  color: $magic;
+  font-size: 1.65rem;
+  background: radial-gradient(circle, rgba($magic, 0.24), rgba(#07100a, 0.9) 70%);
+  box-shadow:
+    inset 0 0 0.75rem rgba($magic, 0.13),
+    0 0 0.65rem rgba($magic, 0.12);
+}
+
+.ingredient-card__content {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.ingredient-card__name {
+  overflow: hidden;
+  font-size: clamp(0.78rem, 1.1vw, 1rem);
+  letter-spacing: 0.025em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingredient-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.22rem;
+}
+
+.ingredient-card__stat {
+  padding: 0.12rem 0.24rem;
+  border: 1px solid currentcolor;
+  border-radius: 0.2rem;
+  font-size: clamp(0.63rem, 0.85vw, 0.75rem);
+  font-variant-numeric: tabular-nums;
+
+  abbr {
+    text-decoration: none;
+  }
+}
+
+.ingredient-card__stat--temperature {
+  color: $temperature;
+}
+
+.ingredient-card__stat--density {
+  color: $density;
+}
+
+.ingredient-card__stat--magic {
+  color: $arcane;
+}
+
+.ingredient-card__stock {
+  display: grid;
+  width: 2rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid $magic;
+  border-radius: 50%;
+  color: $magic;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  background: #0a1108;
+  box-shadow: 0 0 0.5rem rgba($magic, 0.25);
+}
+
+.ingredient-shelf__notice {
+  margin: 0.7rem 0 0;
+  color: $gold-light;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.cauldron-area {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  align-content: center;
+}
+
+.cauldron-stage {
+  position: relative;
+  display: grid;
+  width: min(100%, 38rem);
+  min-height: clamp(22rem, 42vw, 34rem);
+  place-items: center;
+  isolation: isolate;
+}
+
+.cauldron-stage__glow {
+  position: absolute;
+  z-index: -1;
+  width: 75%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba($magic, 0.3), rgba($magic, 0.05) 45%, transparent 70%);
+  filter: blur(0.5rem);
+}
+
+.cauldron {
+  position: relative;
+  width: min(90%, 31rem);
+  padding-top: 3.5rem;
+}
+
+.cauldron__rim {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 4%;
+  display: grid;
+  width: 92%;
+  min-height: 7.5rem;
+  padding: 1.1rem 2rem;
+  place-items: center;
+  border: clamp(0.65rem, 1.4vw, 1rem) solid #161d16;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgba(#d9ff79, 0.88),
+    rgba($magic, 0.6) 36%,
+    #244c14 68%,
+    #071008 72%
+  );
+  box-shadow:
+    inset 0 0 1.5rem rgba(#f2ff9b, 0.62),
+    0 0 0 2px rgba($gold, 0.45),
+    0 0 2rem rgba($magic, 0.45);
+}
+
+.cauldron__body {
+  position: relative;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1.18;
+  place-items: center;
+  border: 2px solid rgba($gold, 0.5);
+  border-radius: 18% 18% 46% 46% / 25% 25% 58% 58%;
+  background:
+    radial-gradient(circle at 50% 38%, rgba($magic, 0.08), transparent 32%),
+    repeating-radial-gradient(circle at 50% 45%, #273128 0 0.35rem, #111712 0.38rem 0.85rem);
+  box-shadow:
+    inset 0 0 3rem #000,
+    0 1.3rem 1.5rem rgba(#000, 0.65),
+    0 0.8rem 1.5rem rgba($magic, 0.18);
+
+  &::before,
+  &::after {
+    position: absolute;
+    top: 20%;
+    width: 18%;
+    aspect-ratio: 1;
+    border: 0.6rem solid #151d16;
+    border-radius: 50%;
+    content: '';
+  }
+
+  &::before {
+    left: -13%;
+  }
+
+  &::after {
+    right: -13%;
+  }
+}
+
+.cauldron__emblem {
+  display: grid;
+  width: 5.5rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 2px solid $magic;
+  border-radius: 50%;
+  color: $magic;
+  font-size: 3.7rem;
+  line-height: 1;
+  text-shadow: 0 0 0.75rem rgba($magic, 0.8);
+  box-shadow:
+    inset 0 0 1rem rgba($magic, 0.15),
+    0 0 1.1rem rgba($magic, 0.3);
+}
+
+.cauldron__contents {
+  display: flex;
+  gap: clamp(0.35rem, 1vw, 0.75rem);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3.3rem;
+}
+
+.cauldron__empty-message {
+  color: #1c3712;
+  font-size: clamp(0.72rem, 1.2vw, 0.9rem);
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cauldron__ingredient {
+  position: relative;
+  display: grid;
+  width: clamp(2.3rem, 5vw, 3.5rem);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(#efffb0, 0.7);
+  border-radius: 50%;
+  color: #f0ffd0;
+  background: rgba(#142d0d, 0.75);
+  box-shadow: 0 0 0.8rem rgba(#f0ff9d, 0.52);
+}
+
+.cauldron__ingredient-position {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.25rem;
+  display: grid;
+  width: 1.15rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  color: #15200d;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: $gold-light;
+}
+
+.cauldron__ingredient-icon {
+  font-size: clamp(1.1rem, 2.8vw, 1.8rem);
+}
+
+.cauldron-area__counter {
+  z-index: 3;
+  min-width: 12rem;
+  padding: 0.5rem 1rem;
+  margin: -1.8rem 0 0;
+  border: 1px solid rgba($gold, 0.72);
+  border-radius: 0.3rem;
+  color: $gold-light;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  text-align: center;
+  background: rgba(#080c09, 0.96);
+}
+
+.cauldron-area__actions {
+  min-height: 4.6rem;
+  padding-top: 0.75rem;
+}
+
+.primary-action {
+  min-width: min(18rem, 80vw);
+  padding: 0.8rem 2rem;
+  border: 1px solid $gold-light;
+  clip-path: polygon(7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%, 0 50%);
+  color: #efffd0;
+  font-size: clamp(1.25rem, 2.6vw, 2rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: linear-gradient(#47751f, #182d0d);
+  box-shadow:
+    inset 0 0 1rem rgba($magic, 0.28),
+    0 0 1.25rem rgba($magic, 0.28);
+
+  &:hover,
+  &:focus-visible {
+    outline: 2px solid #efffb0;
+    outline-offset: 0.2rem;
+    filter: brightness(1.2);
+  }
+}
+
+.cauldron-area__status {
+  margin: 0;
+  color: $muted-ink;
+  font-size: 0.85rem;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.recipe-panel {
+  display: grid;
+  min-height: 28rem;
+  padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1rem, 2.5vw, 2rem);
+  align-content: center;
+  border-color: rgba($parchment-dark, 0.85);
+  border-radius: 0.6rem 1.2rem 0.7rem 1.4rem;
+  color: #33240f;
+  text-align: center;
+  background:
+    linear-gradient(90deg, rgba(#704414, 0.2), transparent 8% 92%, rgba(#704414, 0.22)),
+    radial-gradient(circle at 20% 15%, rgba(#fff6c9, 0.45), transparent 26%), $parchment;
+  box-shadow:
+    inset 0 0 2.2rem rgba(#56320e, 0.34),
+    0.8rem 0.8rem 0 #3c2913,
+    1rem 1rem 1.5rem rgba(#000, 0.5);
+}
+
+.recipe-panel__eyebrow {
+  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.recipe-panel__title {
+  margin: 0;
+  color: #4c3212;
+  font-size: clamp(1.7rem, 3.4vw, 2.8rem);
+  font-weight: 500;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.recipe-panel__message {
+  max-width: 24rem;
+  margin: 2rem auto;
+  color: #65491f;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.recipe-panel__counter {
+  padding: 0.75rem 0.5rem;
+  margin: 0;
+  border-block: 1px solid rgba(#5e3f18, 0.65);
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.recipe-panel__counter--full {
+  color: #8b1f13;
+  text-shadow: 0 0 0.6rem rgba(#fff, 0.35);
+}
+
+.game-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba($gold, 0.4);
+  color: $muted-ink;
+  font-size: 0.78rem;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .game-board {
+    grid-template-columns: minmax(15rem, 0.85fr) minmax(19rem, 1.15fr);
+  }
+
+  .recipe-panel {
+    grid-column: 1 / -1;
+    min-height: 18rem;
+    box-shadow:
+      inset 0 0 2.2rem rgba(#56320e, 0.34),
+      0.4rem 0.5rem 0 #3c2913,
+      0.6rem 0.7rem 1.3rem rgba(#000, 0.5);
+  }
+}
+
+@media (max-width: 760px) {
+  .game-header {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .game-header__title-group {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .hud__right {
+    justify-content: flex-end;
+  }
+
+  .game-board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ingredient-shelf {
+    order: 2;
+  }
+
+  .ingredient-shelf__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ingredient-card {
+    grid-template-columns: 2.5rem minmax(0, 1fr) 1.8rem;
+  }
+
+  .ingredient-card__icon {
+    width: 2.4rem;
+    font-size: 1.3rem;
+  }
+
+  .ingredient-card__stock {
+    width: 1.7rem;
+    font-size: 0.8rem;
+  }
+
+  .cauldron-area {
+    order: 1;
+  }
+
+  .cauldron-stage {
+    min-height: clamp(21rem, 90vw, 31rem);
+  }
+
+  .recipe-panel {
+    order: 3;
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 500px) {
+  .game-shell {
+    padding: 0.35rem;
+  }
+
+  .game-header {
+    gap: 0.5rem;
+    min-height: 7.5rem;
+    padding: 0.65rem;
+  }
+
+  .hud__right {
+    gap: 0.45rem;
+  }
+
+  .hud__label {
+    font-size: 0.72rem;
+  }
+
+  .hud__value {
+    font-size: 1.2rem;
+  }
+
+  .hud__hearts {
+    font-size: 1.1rem;
+  }
+
+  .game-board {
+    gap: 0.65rem;
+    padding-block: 0.65rem;
+  }
+
+  .ingredient-shelf__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ingredient-card {
+    min-height: 4rem;
+  }
+
+  .ingredient-card__name {
+    white-space: normal;
+  }
+
+  .cauldron-stage {
+    min-height: 21rem;
+  }
+
+  .cauldron {
+    width: 85%;
+  }
+
+  .cauldron__rim {
+    min-height: 6rem;
+    padding-inline: 1rem;
+  }
+
+  .cauldron__body::before,
+  .cauldron__body::after {
+    border-width: 0.42rem;
+  }
+
+  .cauldron__emblem {
+    width: 4.2rem;
+    font-size: 2.8rem;
+  }
+
+  .recipe-panel {
+    min-height: 17rem;
+    padding: 1.5rem 1rem;
   }
 }
