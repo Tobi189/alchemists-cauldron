@@ -10,8 +10,10 @@ export const createMenuState = (): GameState => ({
   timeLeft: 0,
   lives: 0,
   activeRecipe: undefined,
+  lastBrewResult: undefined,
   shelfStock: {},
   cauldronIngredientIds: [],
+  previousCauldronIngredientIds: [],
 });
 
 export const createNewGameState = (random: RandomSource = Math.random): GameState => ({
@@ -20,6 +22,8 @@ export const createNewGameState = (random: RandomSource = Math.random): GameStat
   timeLeft: LEVEL_ONE_RULES.startingTimeSeconds,
   lives: LEVEL_ONE_RULES.startingLives,
   activeRecipe: selectRandomRecipe(LEVEL_ONE_RULES.difficulty, random),
+  lastBrewResult: undefined,
   shelfStock: createShelfStock(INGREDIENTS, LEVEL_ONE_RULES.shelfSize, random),
   cauldronIngredientIds: [],
+  previousCauldronIngredientIds: [],
 });

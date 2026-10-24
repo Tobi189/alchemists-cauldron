@@ -7,6 +7,7 @@ import { createShelf } from './shelf.ts';
 export interface AppHandlers {
   readonly onStartGame: () => void;
   readonly onAddIngredient: (ingredientId: string) => void;
+  readonly onBrew: () => void;
 }
 
 const formatTime = (totalSeconds: number): string => {
@@ -79,7 +80,7 @@ export const renderApp = (
   const shell = document.createElement('main');
   const board = document.createElement('div');
   const shelf = createShelf(state, handlers.onAddIngredient);
-  const cauldron = createCauldron(state, handlers.onStartGame);
+  const cauldron = createCauldron(state, handlers.onStartGame, handlers.onBrew);
   const recipe = createRecipePanel(state);
   const parameterBars = createParameterBars(state);
   const footer = document.createElement('footer');

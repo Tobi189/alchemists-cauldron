@@ -509,8 +509,10 @@ button {
 }
 
 .cauldron-area__actions {
+  display: grid;
   min-height: 4.6rem;
   padding-top: 0.75rem;
+  place-items: center;
 }
 
 .primary-action {
@@ -534,15 +536,33 @@ button {
     outline-offset: 0.2rem;
     filter: brightness(1.2);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.7) brightness(0.6);
+    opacity: 0.62;
+  }
 }
 
 .cauldron-area__status {
-  margin: 0;
+  margin: 0.55rem 0 0;
   color: $muted-ink;
   font-size: 0.85rem;
   font-style: italic;
   letter-spacing: 0.04em;
   text-align: center;
+}
+
+.cauldron-area__status--success {
+  color: $magic;
+  font-style: normal;
+  text-shadow: 0 0 0.65rem rgba($magic, 0.45);
+}
+
+.cauldron-area__status--failure {
+  color: #ff8069;
+  font-style: normal;
+  text-shadow: 0 0 0.55rem rgba(#e33b2c, 0.35);
 }
 
 .recipe-panel {

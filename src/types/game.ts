@@ -1,5 +1,6 @@
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type GameStatus = 'menu' | 'playing' | 'paused' | 'game-over';
+export type BrewResult = 'success' | 'failure';
 export type RandomSource = () => number;
 
 export type ShelfStock = Readonly<Record<string, number>>;
@@ -51,6 +52,8 @@ export interface GameState {
   readonly timeLeft: number;
   readonly lives: number;
   readonly activeRecipe: Recipe | undefined;
+  readonly lastBrewResult: BrewResult | undefined;
   readonly shelfStock: ShelfStock;
   readonly cauldronIngredientIds: readonly string[];
+  readonly previousCauldronIngredientIds: readonly string[];
 }

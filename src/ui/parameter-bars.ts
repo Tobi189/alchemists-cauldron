@@ -124,7 +124,7 @@ export const createParameterBars = (state: GameState): HTMLElement => {
   const section = document.createElement('section');
   const heading = document.createElement('h2');
   const values = calculateCauldronValues(state.cauldronIngredientIds);
-  const previousValues = calculateCauldronValues(state.cauldronIngredientIds.slice(0, -1));
+  const previousValues = calculateCauldronValues(state.previousCauldronIngredientIds);
 
   section.className = 'parameter-panel';
   heading.className = 'visually-hidden';
