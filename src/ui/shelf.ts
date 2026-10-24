@@ -1,0 +1,122 @@
+import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
+import { INGREDIENTS } from '../data/ingredients.ts';
+import type { GameState, Ingredient } from '../types/game.ts';
+
+const formatModifier = (value: number): string =>
+  value > 0 ? `+${value}` : String(value).replace('-', '−');
+
+const createStat = (label: string, value: number, className: string): HTMLElement => {
+  const stat = document.createElement('span');
+  const abbreviation = document.createElement('abbr');
+
+  stat.className = `ingredient-card__stat ${className}`;
+  abbreviation.title = label;
+  abbreviation.textContent = label === 'Magic Power' ? 'MP' : (label[0] ?? '');
+  stat.append(abbreviation, ` ${formatModifier(value)}`);
+
+  return stat;
+};
+
+const createEmptySlot = (position: number): HTMLButtonElement => {
+  const slot = document.createElement('button');
+  const badge = document.createElement('span');
+  const message = document.createElement('span');
+
+  slot.className = 'ingredient-card ingredient-card--empty';
+  slot.type = 'button';
+  slot.disabled = true;
+  slot.setAttribute('aria-label', `Empty ingredient slot ${position}`);
+  badge.className = 'ingredient-card__stock';
+  message.className = 'ingredient-card__empty-message';
+  badge.textContent = '0';
+  message.textContent = 'Empty shelf';
+  slot.append(message, badge);
+
+  return slot;
+};
+
+const createIngredientCard = (
+  ingredient: Ingredient,
+  position: number,
+  state: GameState,
+  isShelfBlocked: boolean,
+  onAddIngredient: (ingredientId: string) => void,
+): HTMLButtonElement => {
+  const stock = state.shelfStock[ingredient.id] ?? 0;
+
+  if (stock === 0) {
+    return createEmptySlot(position);
+  }
+
+  const card = document.createElement('button');
+  const icon = document.createElement('span');
+  const content = document.createElement('span');
+  const name = document.createElement('span');
+  const stats = document.createElement('span');
+  const badge = document.createElement('span');
+
+  card.className = 'ingredient-card';
+  card.type = 'button';
+  card.disabled = isShelfBlocked;
+  card.setAttribute('aria-label', `Add ${ingredient.name}. ${stock} portions remaining.`);
+  icon.className = 'ingredient-card__icon';
+  content.className = 'ingredient-card__content';
+  name.className = 'ingredient-card__name';
+  stats.className = 'ingredient-card__stats';
+  badge.className = 'ingredient-card__stock';
+  icon.textContent = ingredient.icon;
+  icon.setAttribute('aria-hidden', 'true');
+  name.textContent = ingredient.name;
+  badge.textContent = String(stock);
+  stats.append(
+    createStat('Temperature', ingredient.temperature, 'ingredient-card__stat--temperature'),
+    createStat('Density', ingredient.density, 'ingredient-card__stat--density'),
+    createStat('Magic Power', ingredient.magicPower, 'ingredient-card__stat--magic'),
+  );
+  content.append(name, stats);
+  card.append(icon, content, badge);
+  card.addEventListener('click', () => {
+    onAddIngredient(ingredient.id);
+  });
+
+  return card;
+};
+
+export const createShelf = (
+  state: GameState,
+  onAddIngredient: (ingredientId: string) => void,
+): HTMLElement => {
+  const section = document.createElement('section');
+  const heading = document.createElement('h2');
+  const list = document.createElement('div');
+  const isShelfBlocked =
+    state.status !== 'playing' ||
+    state.cauldronIngredientIds.length >= LEVEL_ONE_RULES.cauldronCapacity;
+
+  section.className = 'ingredient-shelf';
+  heading.className = 'panel-heading';
+  list.className = 'ingredient-shelf__list';
+  heading.textContent = 'Ingredients';
+  section.append(heading, list);
+
+  if (state.status === 'menu') {
+    for (let position = 1; position <= LEVEL_ONE_RULES.shelfSize; position += 1) {
+      list.append(createEmptySlot(position));
+    }
+  } else {
+    for (const [index, ingredient] of INGREDIENTS.slice(0, LEVEL_ONE_RULES.shelfSize).entries()) {
+      list.append(
+        createIngredientCard(ingredient, index + 1, state, isShelfBlocked, onAddIngredient),
+      );
+    }
+  }
+
+  if (state.cauldronIngredientIds.length >= LEVEL_ONE_RULES.cauldronCapacity) {
+    const notice = document.createElement('p');
+    notice.className = 'ingredient-shelf__notice';
+    notice.textContent = 'The cauldron is full';
+    section.append(notice);
+  }
+
+  return section;
+};
