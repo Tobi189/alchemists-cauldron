@@ -1,7 +1,5 @@
 import { MAX_INGREDIENT_STOCK, MIN_INGREDIENT_STOCK } from '../data/difficulty.ts';
-import type { Ingredient, ShelfStock } from '../types/game.ts';
-
-export type RandomSource = () => number;
+import type { Ingredient, RandomSource, ShelfStock } from '../types/game.ts';
 
 const getRandomWholeNumber = (minimum: number, maximum: number, random: RandomSource): number =>
   Math.floor(random() * (maximum - minimum + 1)) + minimum;

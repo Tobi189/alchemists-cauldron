@@ -1,5 +1,6 @@
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type GameStatus = 'menu' | 'playing' | 'paused' | 'game-over';
+export type RandomSource = () => number;
 
 export type ShelfStock = Readonly<Record<string, number>>;
 
@@ -22,6 +23,26 @@ export interface GameRules {
   readonly scorePerBrew: number;
   readonly timeBonusSeconds: number;
   readonly reactionCount: number;
+}
+
+export interface ParameterValues {
+  readonly temperature: number;
+  readonly density: number;
+  readonly magicPower: number;
+}
+
+export interface RecipeRange {
+  readonly min: number;
+  readonly max: number;
+}
+
+export interface Recipe {
+  readonly id: string;
+  readonly name: string;
+  readonly difficulty: Difficulty;
+  readonly temperature: RecipeRange;
+  readonly density: RecipeRange;
+  readonly magicPower: RecipeRange;
 }
 
 export interface GameState {

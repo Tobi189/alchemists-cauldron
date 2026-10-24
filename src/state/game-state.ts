@@ -1,8 +1,7 @@
 import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
-import type { RandomSource } from '../logic/stock.ts';
 import { createShelfStock } from '../logic/stock.ts';
-import type { GameState } from '../types/game.ts';
+import type { GameState, RandomSource } from '../types/game.ts';
 
 export const createMenuState = (): GameState => ({
   status: 'menu',
