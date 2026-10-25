@@ -1,4 +1,5 @@
 import type { LeaderboardEntry } from '../types/leaderboard.ts';
+import type { Difficulty } from '../types/game.ts';
 
 export const LEADERBOARD_LIMIT = 10;
 
@@ -25,8 +26,10 @@ export const addLeaderboardEntry = (
   entries: readonly LeaderboardEntry[],
   name: string,
   score: number,
+  difficulty: Difficulty,
   createdAt: number = Date.now(),
-): readonly LeaderboardEntry[] => sortLeaderboard([...entries, { name, score, createdAt }]);
+): readonly LeaderboardEntry[] =>
+  sortLeaderboard([...entries, { name, score, difficulty, createdAt }]);
 
 const padDatePart = (value: number): string => String(value).padStart(2, '0');
 

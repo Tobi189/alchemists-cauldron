@@ -50,6 +50,7 @@ export interface Recipe {
 }
 
 export interface GameState {
+  readonly difficulty: Difficulty;
   readonly status: GameStatus;
   readonly score: number;
   readonly timeLeft: number;

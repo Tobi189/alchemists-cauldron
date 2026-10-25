@@ -1,5 +1,6 @@
+import { DIFFICULTIES, DIFFICULTY_SETTINGS } from '../data/difficulty.ts';
 import { formatLeaderboardDate, isValidPlayerName } from '../logic/leaderboard.ts';
-import type { GameOverReason, GameState } from '../types/game.ts';
+import type { Difficulty, GameOverReason, GameState } from '../types/game.ts';
 import type { LeaderboardEntry } from '../types/leaderboard.ts';
 
 const createDialogButton = (
@@ -118,6 +119,9 @@ export const createGameOverDialog = (
   return overlay;
 };
 
+const formatDifficulty = (difficulty: Difficulty): string =>
+  `${difficulty[0]?.toUpperCase() ?? ''}${difficulty.slice(1)}`;
+
 const createLeaderboardTable = (entries: readonly LeaderboardEntry[]): HTMLElement => {
   const table = document.createElement('table');
   const head = document.createElement('thead');
@@ -126,7 +130,7 @@ const createLeaderboardTable = (entries: readonly LeaderboardEntry[]): HTMLEleme
 
   table.className = 'leaderboard-table';
 
-  for (const heading of ['Rank', 'Name', 'Score', 'Date']) {
+  for (const heading of ['Rank', 'Name', 'Difficulty', 'Score', 'Date']) {
     const cell = document.createElement('th');
     cell.scope = 'col';
     cell.textContent = heading;
@@ -139,6 +143,7 @@ const createLeaderboardTable = (entries: readonly LeaderboardEntry[]): HTMLEleme
     for (const value of [
       String(index + 1),
       entry.name,
+      formatDifficulty(entry.difficulty),
       String(entry.score),
       formatLeaderboardDate(entry.createdAt),
     ]) {
@@ -158,7 +163,9 @@ const createLeaderboardTable = (entries: readonly LeaderboardEntry[]): HTMLEleme
 
 export const createLeaderboardDialog = (
   entries: readonly LeaderboardEntry[],
+  selectedDifficulty: Difficulty,
   notice: string | undefined,
+  onSelectDifficulty: (difficulty: Difficulty) => void,
   onClose: () => void,
   onRequestClear: () => void,
 ): HTMLElement => {
@@ -167,6 +174,7 @@ export const createLeaderboardDialog = (
   const eyebrow = document.createElement('p');
   const title = document.createElement('h2');
   const content = document.createElement('div');
+  const difficultyTabs = document.createElement('div');
   const actions = document.createElement('div');
   const closeButton = createDialogButton('Close', 'primary-action', onClose);
   const clearButton = createDialogButton('Clear Leaderboard', 'secondary-action', onRequestClear);
@@ -182,9 +190,27 @@ export const createLeaderboardDialog = (
   title.id = 'leaderboard-title';
   title.textContent = 'Top Players';
   content.className = 'leaderboard-dialog__content';
+  difficultyTabs.className = 'difficulty-tabs';
+  difficultyTabs.setAttribute('aria-label', 'Leaderboard difficulty');
   actions.className = 'dialog-actions';
   closeButton.autofocus = true;
   clearButton.disabled = entries.length === 0;
+
+  for (const difficulty of DIFFICULTIES) {
+    const button = createDialogButton(
+      formatDifficulty(difficulty),
+      'difficulty-tabs__button',
+      () => {
+        onSelectDifficulty(difficulty);
+      },
+    );
+
+    button.classList.toggle('difficulty-tabs__button--selected', difficulty === selectedDifficulty);
+    button.setAttribute('aria-pressed', String(difficulty === selectedDifficulty));
+    difficultyTabs.append(button);
+  }
+
+  content.append(difficultyTabs);
 
   if (notice) {
     const noticeElement = document.createElement('p');
@@ -197,7 +223,7 @@ export const createLeaderboardDialog = (
   if (entries.length === 0) {
     const emptyMessage = document.createElement('p');
     emptyMessage.className = 'leaderboard-dialog__empty';
-    emptyMessage.textContent = 'No results yet. Brew a potion and claim the first place.';
+    emptyMessage.textContent = `No ${formatDifficulty(selectedDifficulty)} results yet. Brew a potion and claim the first place.`;
     content.append(emptyMessage);
   } else {
     content.append(createLeaderboardTable(entries));
@@ -211,6 +237,7 @@ export const createLeaderboardDialog = (
 };
 
 export const createClearLeaderboardDialog = (
+  difficulty: Difficulty,
   onConfirm: () => void,
   onCancel: () => void,
 ): HTMLElement => {
@@ -231,7 +258,7 @@ export const createClearLeaderboardDialog = (
   title.id = 'clear-leaderboard-title';
   title.textContent = 'Clear Leaderboard?';
   message.className = 'game-over-dialog__reason';
-  message.textContent = 'All saved Level 1 results will be permanently removed.';
+  message.textContent = `All saved ${formatDifficulty(difficulty)} results will be permanently removed.`;
   actions.className = 'dialog-actions';
   cancelButton.autofocus = true;
   actions.append(confirmButton, cancelButton);
@@ -275,6 +302,120 @@ export const createPauseDialog = (
   message.textContent = 'Your ingredients, recipe, score and remaining time are preserved.';
   actions.append(resumeButton, exitButton);
   dialog.append(eyebrow, title, message, actions);
+  overlay.append(dialog);
+
+  return overlay;
+};
+
+export const createHelpDialog = (onClose: () => void): HTMLElement => {
+  const overlay = document.createElement('div');
+  const dialog = document.createElement('section');
+  const eyebrow = document.createElement('p');
+  const title = document.createElement('h2');
+  const rules = document.createElement('ol');
+  const tips = [
+    'Choose a difficulty in Settings, then start a new game.',
+    'Select ingredients to add them to the cauldron. Every portion is spent.',
+    'Use the three parameter bars to match the active recipe ranges.',
+    'Press Brew after adding at least one ingredient.',
+    'A successful brew awards points and time. A failed brew costs one life.',
+    'The game ends when time, lives, or all available ingredients run out.',
+  ];
+
+  overlay.className = 'dialog-overlay';
+  dialog.className = 'game-over-dialog information-dialog';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'help-dialog-title');
+  eyebrow.className = 'game-over-dialog__eyebrow';
+  eyebrow.textContent = 'Apprentice handbook';
+  title.className = 'game-over-dialog__title information-dialog__title';
+  title.id = 'help-dialog-title';
+  title.textContent = 'How to Play';
+  rules.className = 'information-dialog__rules';
+
+  for (const tip of tips) {
+    const item = document.createElement('li');
+    item.textContent = tip;
+    rules.append(item);
+  }
+
+  const actions = document.createElement('div');
+  const closeButton = createDialogButton('Close', 'primary-action', onClose);
+  actions.className = 'dialog-actions';
+  closeButton.autofocus = true;
+  actions.append(closeButton);
+  dialog.append(eyebrow, title, rules, actions);
+  overlay.append(dialog);
+
+  return overlay;
+};
+
+const createDifficultyCard = (
+  difficulty: Difficulty,
+  selectedDifficulty: Difficulty,
+  onSelectDifficulty: (difficulty: Difficulty) => void,
+): HTMLButtonElement => {
+  const settings = DIFFICULTY_SETTINGS[difficulty];
+  const button = document.createElement('button');
+  const name = document.createElement('strong');
+  const summary = document.createElement('span');
+  const details = document.createElement('span');
+
+  button.className = 'difficulty-card';
+  button.classList.toggle('difficulty-card--selected', difficulty === selectedDifficulty);
+  button.type = 'button';
+  button.setAttribute('aria-pressed', String(difficulty === selectedDifficulty));
+  name.className = 'difficulty-card__name';
+  name.textContent = formatDifficulty(difficulty);
+  summary.className = 'difficulty-card__summary';
+  summary.textContent = `${settings.startingTimeSeconds}s · ${settings.startingLives} lives · ${settings.scorePerBrew} points`;
+  details.className = 'difficulty-card__details';
+  details.textContent = `${settings.shelfSize} shelf ingredients · ${settings.cauldronCapacity} cauldron limit · ±${settings.recipeTolerance} tolerance · +${settings.timeBonusSeconds}s bonus`;
+  button.append(name, summary, details);
+  button.addEventListener('click', () => {
+    onSelectDifficulty(difficulty);
+  });
+
+  return button;
+};
+
+export const createSettingsDialog = (
+  selectedDifficulty: Difficulty,
+  onSelectDifficulty: (difficulty: Difficulty) => void,
+  onClose: () => void,
+): HTMLElement => {
+  const overlay = document.createElement('div');
+  const dialog = document.createElement('section');
+  const eyebrow = document.createElement('p');
+  const title = document.createElement('h2');
+  const message = document.createElement('p');
+  const choices = document.createElement('div');
+  const actions = document.createElement('div');
+  const closeButton = createDialogButton('Done', 'primary-action', onClose);
+
+  overlay.className = 'dialog-overlay';
+  dialog.className = 'game-over-dialog settings-dialog';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'settings-dialog-title');
+  eyebrow.className = 'game-over-dialog__eyebrow';
+  eyebrow.textContent = 'Prepare the workshop';
+  title.className = 'game-over-dialog__title information-dialog__title';
+  title.id = 'settings-dialog-title';
+  title.textContent = 'Difficulty';
+  message.className = 'settings-dialog__message';
+  message.textContent = 'Choose the rules for your next game.';
+  choices.className = 'settings-dialog__choices';
+  actions.className = 'dialog-actions';
+  closeButton.autofocus = true;
+
+  for (const difficulty of DIFFICULTIES) {
+    choices.append(createDifficultyCard(difficulty, selectedDifficulty, onSelectDifficulty));
+  }
+
+  actions.append(closeButton);
+  dialog.append(eyebrow, title, message, choices, actions);
   overlay.append(dialog);
 
   return overlay;

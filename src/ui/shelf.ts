@@ -1,4 +1,4 @@
-import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
+import { getDifficultySettings } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
 import type { GameState, Ingredient } from '../types/game.ts';
 
@@ -101,9 +101,9 @@ export const createShelf = (
   const section = document.createElement('section');
   const heading = document.createElement('h2');
   const list = document.createElement('div');
+  const rules = getDifficultySettings(state.difficulty);
   const isShelfBlocked =
-    state.status !== 'playing' ||
-    state.cauldronIngredientIds.length >= LEVEL_ONE_RULES.cauldronCapacity;
+    state.status !== 'playing' || state.cauldronIngredientIds.length >= rules.cauldronCapacity;
 
   section.className = 'ingredient-shelf';
   heading.className = 'panel-heading';
@@ -112,18 +112,18 @@ export const createShelf = (
   section.append(heading, list);
 
   if (state.status === 'menu') {
-    for (let position = 1; position <= LEVEL_ONE_RULES.shelfSize; position += 1) {
+    for (let position = 1; position <= rules.shelfSize; position += 1) {
       list.append(createEmptySlot(position));
     }
   } else {
-    for (const [index, ingredient] of INGREDIENTS.slice(0, LEVEL_ONE_RULES.shelfSize).entries()) {
+    for (const [index, ingredient] of INGREDIENTS.slice(0, rules.shelfSize).entries()) {
       list.append(
         createIngredientCard(ingredient, index + 1, state, isShelfBlocked, onAddIngredient),
       );
     }
   }
 
-  if (state.cauldronIngredientIds.length >= LEVEL_ONE_RULES.cauldronCapacity) {
+  if (state.cauldronIngredientIds.length >= rules.cauldronCapacity) {
     const notice = document.createElement('p');
     notice.className = 'ingredient-shelf__notice';
     notice.textContent = 'The cauldron is full';
