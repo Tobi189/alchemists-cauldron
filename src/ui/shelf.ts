@@ -68,6 +68,7 @@ const createIngredientCard = (
   card.type = 'button';
   card.disabled = isShelfBlocked;
   card.draggable = !isShelfBlocked;
+  card.ariaKeyShortcuts = String(position);
   card.setAttribute('aria-label', `Add ${ingredient.name}. ${stock} portions remaining.`);
   icon.className = 'ingredient-card__icon';
   content.className = 'ingredient-card__content';
