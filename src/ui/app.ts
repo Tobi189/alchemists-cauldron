@@ -25,7 +25,9 @@ export interface AppHandlers {
   readonly menuDialog: 'closed' | 'help' | 'settings';
   readonly leaderboardNotice: string | undefined;
   readonly shouldRequestPlayerName: boolean;
+  readonly hasSavedGame: boolean;
   readonly onStartGame: () => void;
+  readonly onContinueGame: () => void;
   readonly onPlayAgain: () => void;
   readonly onOpenLeaderboard: () => void;
   readonly onSelectLeaderboardDifficulty: (difficulty: Difficulty) => void;
@@ -166,6 +168,8 @@ export const renderApp = (
   const gameControls = createGameControls(
     state,
     handlers.onStartGame,
+    handlers.onContinueGame,
+    handlers.hasSavedGame,
     handlers.onBrew,
     handlers.onOpenLeaderboard,
     handlers.onOpenHelp,

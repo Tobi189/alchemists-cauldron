@@ -42,6 +42,8 @@ const createBrewStatus = (state: GameState): HTMLElement => {
 export const createGameControls = (
   state: GameState,
   onStartGame: () => void,
+  onContinueGame: () => void,
+  hasSavedGame: boolean,
   onBrew: () => void,
   onOpenLeaderboard: () => void,
   onOpenHelp: () => void,
@@ -68,10 +70,15 @@ export const createGameControls = (
         onOpenLeaderboard();
       }),
     );
-    centerSlot.append(
-      createActionButton('Start Game', 'primary-action', onStartGame),
-      selectedDifficulty,
-    );
+    const startActions = document.createElement('div');
+    startActions.className = 'game-controls__start-actions';
+    startActions.append(createActionButton('Start Game', 'primary-action', onStartGame));
+
+    if (hasSavedGame) {
+      startActions.append(createActionButton('Continue Game', 'secondary-action', onContinueGame));
+    }
+
+    centerSlot.append(startActions, selectedDifficulty);
     rightSlot.append(
       createActionButton('Help', 'secondary-action game-controls__side-action', onOpenHelp),
       createActionButton('Settings', 'secondary-action game-controls__side-action', onOpenSettings),

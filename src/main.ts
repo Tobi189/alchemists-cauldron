@@ -8,6 +8,7 @@ import { pauseGame, resumeGame } from './logic/pause.ts';
 import { syncTimer } from './logic/timer.ts';
 import { createMenuState, createNewGameState } from './state/game-state.ts';
 import { didClearLeaderboard, didSaveLeaderboard, loadLeaderboard } from './storage/leaderboard.ts';
+import { didClearSavedGame, didSaveGame, loadGame } from './storage/save.ts';
 import type { Difficulty, GameState } from './types/game.ts';
 import type { LeaderboardEntry } from './types/leaderboard.ts';
 import { renderApp } from './ui/app.ts';
@@ -19,7 +20,8 @@ if (!app) {
 }
 
 const startApp = (container: HTMLElement): void => {
-  let gameState: GameState = createMenuState();
+  let continuableGame: GameState | undefined = loadGame();
+  let gameState: GameState = createMenuState(continuableGame?.difficulty);
   let leaderboards: Readonly<Record<Difficulty, readonly LeaderboardEntry[]>> = {
     easy: loadLeaderboard('easy'),
     medium: loadLeaderboard('medium'),
@@ -31,12 +33,57 @@ const startApp = (container: HTMLElement): void => {
   let leaderboardNotice: string | undefined;
   let hasHandledCurrentResult = false;
 
+  const persistCurrentGame = (): void => {
+    if (gameState.status === 'playing' || gameState.status === 'paused') {
+      if (didSaveGame(gameState)) {
+        continuableGame = {
+          ...gameState,
+          status: 'paused',
+          timerEndsAt: undefined,
+          lastBrewResult: undefined,
+          previousCauldronIngredientIds: gameState.cauldronIngredientIds,
+        };
+      } else {
+        didClearSavedGame();
+        continuableGame = undefined;
+      }
+
+      return;
+    }
+
+    if (gameState.status !== 'game-over') {
+      return;
+    }
+
+    didClearSavedGame();
+    continuableGame = undefined;
+  };
+
   const startNewGame = (): void => {
     gameState = createNewGameState(gameState.difficulty);
     leaderboardDialog = 'closed';
     menuDialog = 'closed';
     leaderboardNotice = undefined;
     hasHandledCurrentResult = false;
+    persistCurrentGame();
+    render();
+  };
+
+  const continueSavedGame = (): void => {
+    if (!continuableGame) {
+      return;
+    }
+
+    gameState = {
+      ...continuableGame,
+      status: 'paused',
+      timerEndsAt: undefined,
+    };
+    leaderboardDialog = 'closed';
+    menuDialog = 'closed';
+    leaderboardNotice = undefined;
+    hasHandledCurrentResult = false;
+    persistCurrentGame();
     render();
   };
 
@@ -48,6 +95,7 @@ const startApp = (container: HTMLElement): void => {
     }
 
     gameState = nextState;
+    persistCurrentGame();
     render();
   };
 
@@ -64,7 +112,9 @@ const startApp = (container: HTMLElement): void => {
         gameState.status === 'game-over' &&
         !hasHandledCurrentResult &&
         isTopTenScore(gameState.score, currentLeaderboard),
+      hasSavedGame: continuableGame !== undefined,
       onStartGame: startNewGame,
+      onContinueGame: continueSavedGame,
       onPlayAgain: startNewGame,
       onOpenLeaderboard: () => {
         leaderboardDifficulty = gameState.difficulty;
@@ -149,10 +199,13 @@ const startApp = (container: HTMLElement): void => {
         }
 
         gameState = nextState;
+        persistCurrentGame();
         render();
       },
       onExitToMenu: () => {
         gameState = createMenuState(gameState.difficulty);
+        didClearSavedGame();
+        continuableGame = undefined;
         leaderboardDialog = 'closed';
         menuDialog = 'closed';
         leaderboardNotice = undefined;
@@ -167,6 +220,7 @@ const startApp = (container: HTMLElement): void => {
         }
 
         gameState = nextState;
+        persistCurrentGame();
         render();
       },
       onBrew: () => {
@@ -177,6 +231,7 @@ const startApp = (container: HTMLElement): void => {
         }
 
         gameState = nextState;
+        persistCurrentGame();
         render();
       },
     });
@@ -205,8 +260,14 @@ const startApp = (container: HTMLElement): void => {
     }
 
     gameState = nextState;
+    persistCurrentGame();
     render();
   }, 250);
+
+  globalThis.addEventListener('pagehide', () => {
+    gameState = syncTimer(gameState);
+    persistCurrentGame();
+  });
 };
 
 startApp(app);
