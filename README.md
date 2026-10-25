@@ -19,7 +19,8 @@ target ranges before time, lives or ingredient stock runs out.
 
 ## Current implementation
 
-The project is currently in its technical-foundation stage.
+The project currently implements the complete technical foundation, Level 1 and Level 2 requirements
+for a total proposed score of **278 points**.
 
 Implemented:
 
@@ -29,17 +30,25 @@ Implemented:
 - [x] Husky commit-message and pre-push hooks
 - [x] Organized source-code structure
 - [x] Pull request template
+- [x] Complete Level 1 Medium-difficulty game
+- [x] Ingredient stock, recipes, brewing, scoring, timer, lives and pause flow
+- [x] Top-10 leaderboard with safe localStorage handling
+- [x] Help and Settings dialogs
+- [x] Easy, Medium and Hard difficulty selection
+- [x] Difficulty-specific shelves, recipes, limits, scoring and bonuses
+- [x] Separate Top-10 leaderboard for each difficulty
+- [x] Validated auto-save and Continue Game
+- [x] GitHub Pages deployment
 
 Planned:
 
-- [ ] Level 1 — complete basic game
-- [ ] Level 2 — difficulty selection, saving and continuing
 - [ ] Level 3 — advanced controls, reactions and visual feedback
-- [x] GitHub Pages deployment
-
-This section will be updated as each story is completed.
 
 ## Game overview
+
+A player can read the rules from Help, choose Easy, Medium or Hard in Settings, and then start a
+game. Each difficulty controls the shelf size, cauldron capacity, timer, tolerance, lives, scoring,
+time bonus and recipe pool.
 
 A game begins with a randomly selected recipe and a shelf of ingredients. Every ingredient changes
 three cauldron parameters:
@@ -54,14 +63,17 @@ and attempts to move all three parameter values into the active recipe's target 
 A successful brew awards points and a time bonus. A failed brew removes one life. The game ends
 when time expires, all lives are lost, or no ingredients remain.
 
-## Planned levels
+Unfinished games are saved automatically. A valid save can be restored with **Continue Game** and
+opens in the paused state. Finished, abandoned and malformed saves are not offered for continuation.
 
-| Level        | Functionality                                                       | Total score |
-| ------------ | ------------------------------------------------------------------- | ----------: |
-| Precondition | Repository, tooling and project structure                           |          58 |
-| Level 1      | Basic Medium-difficulty game                                        |         228 |
-| Level 2      | Difficulty selection, auto-save and Continue Game                   |         278 |
-| Level 3      | Drag and drop, reactions, tooltips, Pour Out, shortcuts and effects |         393 |
+## Project levels
+
+| Level        | Functionality                                                       | Total score | Status      |
+| ------------ | ------------------------------------------------------------------- | ----------: | ----------- |
+| Precondition | Repository, tooling and project structure                           |          58 | Complete    |
+| Level 1      | Basic Medium-difficulty game                                        |         228 | Complete    |
+| Level 2      | Difficulty selection, auto-save and Continue Game                   |         278 | Complete    |
+| Level 3      | Drag and drop, reactions, tooltips, Pour Out, shortcuts and effects |         393 | In progress |
 
 ## Technology
 
@@ -174,7 +186,7 @@ messages against the configured RS School-style convention.
 Development uses cumulative story branches:
 
 - `story-1` is based on `main`.
-- `story-2` will be based on `story-1`.
+- `story-2` is based on `story-1`.
 - `story-3` will be based on `story-2`.
 - Small task branches are merged into the current story branch.
 - Final story pull requests target the preceding story branch and remain unmerged for Cross-Check.

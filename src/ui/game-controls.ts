@@ -1,4 +1,4 @@
-import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
+import { getDifficultySettings } from '../data/difficulty.ts';
 import type { GameState } from '../types/game.ts';
 
 const createActionButton = (
@@ -19,17 +19,18 @@ const createActionButton = (
 const createBrewStatus = (state: GameState): HTMLElement => {
   const status = document.createElement('p');
   const count = state.cauldronIngredientIds.length;
+  const rules = getDifficultySettings(state.difficulty);
 
   status.className = 'game-controls__status';
   status.setAttribute('aria-live', 'polite');
 
   if (state.lastBrewResult === 'success') {
     status.classList.add('game-controls__status--success');
-    status.textContent = `Successful brew: +${LEVEL_ONE_RULES.scorePerBrew} points`;
+    status.textContent = `Successful brew: +${rules.scorePerBrew} points`;
   } else if (state.lastBrewResult === 'failure') {
     status.classList.add('game-controls__status--failure');
     status.textContent = 'The mixture failed: one life lost';
-  } else if (count === LEVEL_ONE_RULES.cauldronCapacity) {
+  } else if (count === rules.cauldronCapacity) {
     status.textContent = 'Maximum capacity reached';
   } else {
     status.textContent = 'Select ingredients, match all three parameters, then brew';
@@ -41,8 +42,12 @@ const createBrewStatus = (state: GameState): HTMLElement => {
 export const createGameControls = (
   state: GameState,
   onStartGame: () => void,
+  onContinueGame: () => void,
+  hasSavedGame: boolean,
   onBrew: () => void,
   onOpenLeaderboard: () => void,
+  onOpenHelp: () => void,
+  onOpenSettings: () => void,
   onPause: () => void,
 ): HTMLElement => {
   const controls = document.createElement('section');
@@ -57,12 +62,27 @@ export const createGameControls = (
   rightSlot.className = 'game-controls__side game-controls__side--right';
 
   if (state.status === 'menu') {
+    const selectedDifficulty = document.createElement('p');
+    selectedDifficulty.className = 'game-controls__difficulty';
+    selectedDifficulty.textContent = `Difficulty: ${state.difficulty[0]?.toUpperCase() ?? ''}${state.difficulty.slice(1)}`;
     leftSlot.append(
       createActionButton('Top Players', 'secondary-action game-controls__side-action', () => {
         onOpenLeaderboard();
       }),
     );
-    centerSlot.append(createActionButton('Start Game', 'primary-action', onStartGame));
+    const startActions = document.createElement('div');
+    startActions.className = 'game-controls__start-actions';
+    startActions.append(createActionButton('Start Game', 'primary-action', onStartGame));
+
+    if (hasSavedGame) {
+      startActions.append(createActionButton('Continue Game', 'secondary-action', onContinueGame));
+    }
+
+    centerSlot.append(startActions, selectedDifficulty);
+    rightSlot.append(
+      createActionButton('Help', 'secondary-action game-controls__side-action', onOpenHelp),
+      createActionButton('Settings', 'secondary-action game-controls__side-action', onOpenSettings),
+    );
   } else {
     const brewButton = createActionButton('Brew', 'primary-action', onBrew);
     brewButton.disabled = state.cauldronIngredientIds.length === 0 || state.status !== 'playing';
