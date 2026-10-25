@@ -11,7 +11,7 @@ import { syncTimer } from './logic/timer.ts';
 import { createMenuState, createNewGameState } from './state/game-state.ts';
 import { didClearLeaderboard, didSaveLeaderboard, loadLeaderboard } from './storage/leaderboard.ts';
 import { didClearSavedGame, didSaveGame, loadGame } from './storage/save.ts';
-import type { Difficulty, GameState } from './types/game.ts';
+import type { BrewResult, Difficulty, GameState } from './types/game.ts';
 import type { LeaderboardEntry } from './types/leaderboard.ts';
 import { renderApp } from './ui/app.ts';
 import { getGameShortcut } from './ui/keyboard-shortcuts.ts';
@@ -35,6 +35,7 @@ const startApp = (container: HTMLElement): void => {
   let menuDialog: 'closed' | 'help' | 'settings' = 'closed';
   let leaderboardNotice: string | undefined;
   let hasHandledCurrentResult = false;
+  let brewVisualFeedback: BrewResult | undefined;
 
   const persistCurrentGame = (): void => {
     if (gameState.status === 'playing' || gameState.status === 'paused') {
@@ -68,6 +69,7 @@ const startApp = (container: HTMLElement): void => {
     menuDialog = 'closed';
     leaderboardNotice = undefined;
     hasHandledCurrentResult = false;
+    brewVisualFeedback = undefined;
     persistCurrentGame();
     render();
   };
@@ -86,6 +88,7 @@ const startApp = (container: HTMLElement): void => {
     menuDialog = 'closed';
     leaderboardNotice = undefined;
     hasHandledCurrentResult = false;
+    brewVisualFeedback = undefined;
     persistCurrentGame();
     render();
   };
@@ -134,6 +137,7 @@ const startApp = (container: HTMLElement): void => {
     }
 
     gameState = nextState;
+    brewVisualFeedback = nextState.lastBrewResult;
     persistCurrentGame();
     render();
   };
@@ -159,6 +163,7 @@ const startApp = (container: HTMLElement): void => {
       leaderboardDialog,
       menuDialog,
       leaderboardNotice,
+      brewVisualFeedback,
       shouldRequestPlayerName:
         gameState.status === 'game-over' &&
         !hasHandledCurrentResult &&
@@ -257,6 +262,8 @@ const startApp = (container: HTMLElement): void => {
       onBrew: brewCurrentPotion,
       onPourOut: pourOutCurrentCauldron,
     });
+
+    brewVisualFeedback = undefined;
 
     if (gameState.previousCauldronIngredientIds !== gameState.cauldronIngredientIds) {
       gameState = {
