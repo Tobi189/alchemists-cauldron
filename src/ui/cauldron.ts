@@ -1,3 +1,5 @@
+import cauldronEmblemUrl from '../assets/ui/cauldron-emblem.svg';
+import cauldronFiligreeUrl from '../assets/ui/cauldron-filigree.svg';
 import { INGREDIENTS } from '../data/ingredients.ts';
 import type { GameState } from '../types/game.ts';
 
@@ -47,21 +49,33 @@ export const createCauldron = (state: GameState): HTMLElement => {
   const glow = document.createElement('div');
   const vessel = document.createElement('div');
   const rim = document.createElement('div');
+  const liquid = document.createElement('div');
   const body = document.createElement('div');
-  const emblem = document.createElement('span');
+  const filigree = document.createElement('img');
+  const emblem = document.createElement('img');
+  const base = document.createElement('div');
 
   section.className = 'cauldron-area';
   stage.className = 'cauldron-stage';
   glow.className = 'cauldron-stage__glow';
   vessel.className = 'cauldron';
   rim.className = 'cauldron__rim';
+  liquid.className = 'cauldron__liquid';
   body.className = 'cauldron__body';
+  filigree.className = 'cauldron__filigree';
   emblem.className = 'cauldron__emblem';
-  emblem.textContent = '△';
+  base.className = 'cauldron__base';
+  filigree.src = cauldronFiligreeUrl;
+  filigree.alt = '';
+  filigree.setAttribute('aria-hidden', 'true');
+  emblem.src = cauldronEmblemUrl;
+  emblem.alt = '';
+  emblem.setAttribute('aria-hidden', 'true');
 
-  rim.append(createCauldronContents(state));
-  body.append(emblem);
-  vessel.append(rim, body);
+  liquid.append(createCauldronContents(state));
+  rim.append(liquid);
+  body.append(filigree, emblem);
+  vessel.append(rim, body, base);
   stage.append(glow, vessel);
 
   section.append(stage);
