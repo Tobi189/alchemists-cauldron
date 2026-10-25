@@ -1,3 +1,6 @@
+import clockIconUrl from '../assets/ui/clock.svg';
+import heartIconUrl from '../assets/ui/heart.svg';
+import scoreIconUrl from '../assets/ui/score-emblem.svg';
 import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import type { GameState } from '../types/game.ts';
 import type { LeaderboardEntry } from '../types/leaderboard.ts';
@@ -40,24 +43,29 @@ const formatTime = (totalSeconds: number): string => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-const createHudItem = (label: string, value: string): HTMLElement => {
+const createHudItem = (label: string, value: string, iconUrl: string): HTMLElement => {
   const item = document.createElement('div');
+  const icon = document.createElement('img');
   const itemLabel = document.createElement('span');
   const itemValue = document.createElement('strong');
 
   item.className = 'hud__item';
+  icon.className = 'hud__icon';
+  icon.src = iconUrl;
+  icon.alt = '';
+  icon.setAttribute('aria-hidden', 'true');
   itemLabel.className = 'hud__label';
   itemValue.className = 'hud__value';
   itemLabel.textContent = label;
   itemValue.textContent = value;
-  item.append(itemLabel, itemValue);
+  item.append(icon, itemLabel, itemValue);
 
   return item;
 };
 
 const createTimerHud = (state: GameState): HTMLElement => {
   const timer = document.createElement('div');
-  const timerText = createHudItem('Time', formatTime(state.timeLeft));
+  const timerText = createHudItem('Time', formatTime(state.timeLeft), clockIconUrl);
   const progress = document.createElement('div');
   const fill = document.createElement('span');
   const progressPercentage = (state.timeLeft / LEVEL_ONE_RULES.startingTimeSeconds) * 100;
@@ -84,24 +92,23 @@ const createTimerHud = (state: GameState): HTMLElement => {
 
 const createHeader = (state: GameState): HTMLElement => {
   const header = document.createElement('header');
+  const frame = document.createElement('div');
   const hud = document.createElement('div');
-  const score = createHudItem('Score', String(state.score));
+  const score = createHudItem('Score', String(state.score), scoreIconUrl);
   const titleGroup = document.createElement('div');
-  const eyebrow = document.createElement('span');
   const title = document.createElement('h1');
   const time = createTimerHud(state);
 
   const lives = document.createElement('div');
 
   header.className = 'game-header';
+  frame.className = 'game-header__frame';
   hud.className = 'game-header__hud';
   score.classList.add('hud__score');
   titleGroup.className = 'game-header__title-group';
-  eyebrow.className = 'game-header__eyebrow';
   title.className = 'game-header__title';
-  eyebrow.textContent = 'The Arcane Workshop';
   title.textContent = "Alchemist's Cauldron";
-  titleGroup.append(eyebrow, title);
+  titleGroup.append(title);
 
   if (state.status === 'menu') {
     lives.className = 'hud__lives hud__lives--empty';
@@ -114,13 +121,23 @@ const createHeader = (state: GameState): HTMLElement => {
     livesLabel.className = 'visually-hidden';
     hearts.className = 'hud__hearts';
     livesLabel.textContent = 'Lives';
-    hearts.textContent = '♥'.repeat(state.lives);
     hearts.setAttribute('aria-label', `${state.lives} lives remaining`);
+
+    for (let life = 0; life < state.lives; life += 1) {
+      const heart = document.createElement('img');
+      heart.className = 'hud__heart';
+      heart.src = heartIconUrl;
+      heart.alt = '';
+      heart.setAttribute('aria-hidden', 'true');
+      hearts.append(heart);
+    }
+
     lives.append(livesLabel, hearts);
   }
 
   hud.append(score, time, lives);
-  header.append(hud, titleGroup);
+  frame.append(hud);
+  header.append(frame, titleGroup);
 
   return header;
 };

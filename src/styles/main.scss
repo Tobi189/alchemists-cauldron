@@ -22,7 +22,7 @@ $parchment-dark: #8b662f;
 html {
   min-width: 320px;
   color-scheme: dark;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
 }
 
 body {
@@ -30,11 +30,14 @@ body {
   margin: 0;
   overflow-x: hidden;
   color: $ink;
+  background-color: #030604;
   background:
-    radial-gradient(circle at 50% 35%, rgba($magic, 0.11), transparent 32rem),
-    radial-gradient(circle at 15% 15%, rgba($gold, 0.08), transparent 24rem),
-    linear-gradient(rgba(1, 4, 2, 0.7), rgba(1, 4, 2, 0.94)),
-    repeating-linear-gradient(90deg, #0b100c 0 4rem, #080c09 4rem 8rem);
+    radial-gradient(ellipse at 50% -5%, rgba(#32641d, 0.3), transparent 38rem),
+    radial-gradient(circle at 12% 22%, rgba($gold, 0.1), transparent 22rem),
+    radial-gradient(circle at 88% 28%, rgba($arcane, 0.07), transparent 24rem),
+    linear-gradient(rgba(#010302, 0.66), rgba(#010302, 0.94)),
+    repeating-linear-gradient(105deg, #0b100c 0 3.5rem, #060906 3.5rem 7rem);
+  background-attachment: fixed;
 }
 
 button,
@@ -81,19 +84,25 @@ button {
 }
 
 .game-header {
+  position: relative;
   display: grid;
-  gap: 0.4rem;
-  min-height: 8.5rem;
-  padding: 0.75rem clamp(0.75rem, 2vw, 1.75rem);
-  border: 1px solid rgba($gold, 0.65);
-  border-radius: 1rem 1rem 0.35rem 0.35rem;
+  margin-bottom: clamp(0.8rem, 1.6vw, 1.4rem);
+  isolation: isolate;
+}
+
+.game-header__frame {
+  position: relative;
+  z-index: 1;
+  min-height: 6.4rem;
+  padding: 1rem clamp(1.1rem, 3vw, 3.2rem);
   background:
-    linear-gradient(135deg, rgba($gold, 0.08), transparent 30%),
-    linear-gradient(180deg, rgba(#1c211d, 0.97), rgba(#090d0a, 0.98));
+    url('../assets/ui/hud-frame.svg') center / 100% 100% no-repeat,
+    linear-gradient(90deg, rgba($gold, 0.12), transparent 18% 82%, rgba($gold, 0.12)),
+    radial-gradient(ellipse at 50% 0, rgba($magic, 0.1), transparent 55%),
+    linear-gradient(180deg, rgba(#1a211b, 0.98), rgba(#060906, 0.99));
   box-shadow:
-    inset 0 0 0 3px rgba(#000, 0.55),
-    inset 0 -1rem 2rem rgba(#000, 0.35),
-    0 0.6rem 2rem rgba(#000, 0.45);
+    inset 0 -1.2rem 2rem rgba(#000, 0.42),
+    0 0.8rem 2.2rem rgba(#000, 0.58);
 }
 
 .game-header__hud {
@@ -104,52 +113,65 @@ button {
 }
 
 .game-header__title-group {
+  position: relative;
+  z-index: 2;
+  width: min(76%, 56rem);
   min-width: 0;
-  padding-top: 0.2rem;
-  border-top: 1px solid rgba($gold, 0.24);
+  padding: clamp(0.55rem, 1.2vw, 0.9rem) clamp(2.5rem, 6vw, 6rem);
+  margin: -0.7rem auto 0;
   text-align: center;
-}
-
-.game-header__eyebrow {
-  display: block;
-  margin-bottom: 0.1rem;
-  color: $gold-light;
-  font-size: clamp(0.65rem, 1vw, 0.8rem);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  background:
+    url('../assets/ui/title-frame.svg') center / 100% 100% no-repeat,
+    radial-gradient(ellipse at 50% 50%, rgba($magic, 0.18), transparent 64%),
+    linear-gradient(180deg, #182119, #070a07);
+  box-shadow:
+    inset 0 0 1.2rem rgba($magic, 0.09),
+    0 0.8rem 1.4rem rgba(#000, 0.62),
+    0 0 1rem rgba($magic, 0.12);
+  clip-path: polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0 50%);
 }
 
 .game-header__title {
   margin: 0;
-  color: #d8f6a7;
-  font-size: clamp(1.65rem, 4vw, 3.2rem);
-  font-weight: 500;
+  color: #e4ffc0;
+  font-size: clamp(1.7rem, 4vw, 3.45rem);
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
   text-shadow:
-    0 0 0.4rem rgba($magic, 0.9),
-    0 0 1.4rem rgba($magic, 0.45),
+    0 1px #111,
+    0 0 0.32rem rgba($magic, 0.95),
+    0 0 1.3rem rgba($magic, 0.48),
     0 2px #19320d;
 }
 
 .hud__item {
-  display: flex;
-  gap: 0.6rem;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: clamp(0.3rem, 0.8vw, 0.65rem);
+  align-items: center;
   white-space: nowrap;
+}
+
+.hud__icon {
+  width: clamp(2.25rem, 4vw, 3.9rem);
+  aspect-ratio: 1;
+  filter: drop-shadow(0 0.25rem 0.4rem rgba(#000, 0.72));
 }
 
 .hud__label {
   color: $gold-light;
-  font-size: clamp(0.9rem, 1.6vw, 1.35rem);
-  letter-spacing: 0.06em;
+  font-size: clamp(0.78rem, 1.5vw, 1.28rem);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-shadow: 0 2px #000;
 }
 
 .hud__value {
   color: $magic;
-  font-size: clamp(1.35rem, 2.4vw, 2.2rem);
-  font-weight: 500;
+  font-size: clamp(1.2rem, 2.5vw, 2.25rem);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-shadow: 0 0 0.75rem rgba($magic, 0.42);
 }
@@ -162,7 +184,7 @@ button {
   display: grid;
   gap: 0.3rem;
   justify-self: center;
-  min-width: clamp(7.5rem, 11vw, 10rem);
+  min-width: clamp(9rem, 17vw, 15rem);
 
   .hud__item {
     justify-content: center;
@@ -170,8 +192,9 @@ button {
 }
 
 .hud__timer-progress {
-  width: 100%;
+  width: calc(100% - clamp(2.55rem, 4vw, 4.2rem));
   height: 0.38rem;
+  margin-left: auto;
   overflow: hidden;
   border: 1px solid rgba($gold, 0.62);
   border-radius: 999px;
@@ -212,7 +235,7 @@ button {
 }
 
 .hud__lives {
-  min-width: 4.5rem;
+  min-width: clamp(4.5rem, 12vw, 11rem);
   justify-self: end;
   text-align: right;
 }
@@ -222,12 +245,15 @@ button {
 }
 
 .hud__hearts {
-  color: #f04435;
-  font-size: clamp(1.3rem, 2.4vw, 2rem);
-  letter-spacing: 0.08em;
-  text-shadow:
-    0 0 0.2rem #fff,
-    0 0 0.75rem rgba(#ed2a1a, 0.7);
+  display: flex;
+  gap: clamp(0.15rem, 0.6vw, 0.45rem);
+  justify-content: flex-end;
+}
+
+.hud__heart {
+  width: clamp(1.8rem, 3.5vw, 3.25rem);
+  aspect-ratio: 1;
+  filter: drop-shadow(0 0.2rem 0.35rem rgba(#000, 0.8));
 }
 
 .game-board {
@@ -1289,9 +1315,27 @@ button {
   }
 
   .game-header {
-    gap: 0.5rem;
-    min-height: 7.5rem;
-    padding: 0.65rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .game-header__frame {
+    min-height: 5.5rem;
+    padding: 0.75rem 0.65rem;
+  }
+
+  .game-header__hud {
+    gap: 0.25rem;
+  }
+
+  .game-header__title-group {
+    width: 96%;
+    padding: 0.65rem 1.6rem;
+    margin-top: -0.4rem;
+  }
+
+  .game-header__title {
+    font-size: clamp(1.25rem, 6.2vw, 1.7rem);
+    letter-spacing: 0.02em;
   }
 
   .dialog-overlay {
@@ -1317,15 +1361,23 @@ button {
   }
 
   .hud__label {
-    font-size: 0.72rem;
+    font-size: 0.62rem;
   }
 
   .hud__value {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
   }
 
-  .hud__hearts {
-    font-size: 1.1rem;
+  .hud__timer {
+    min-width: 8.2rem;
+  }
+
+  .hud__timer-progress {
+    width: calc(100% - 2.4rem);
+  }
+
+  .hud__lives {
+    min-width: 3.5rem;
   }
 
   .game-board {

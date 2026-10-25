@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Life</title>
+  <defs>
+    <linearGradient id="heart" x1="0" y1="0" x2="0.75" y2="1">
+      <stop stop-color="#ff8b69"/>
+      <stop offset="0.38" stop-color="#e73b27"/>
+      <stop offset="1" stop-color="#7d100d"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <path d="M32 54C26 47 9 37 9 22 9 12 17 7 25 9c3 .8 5.5 2.8 7 5.4C33.5 11.8 36 9.8 39 9c8-2 16 3 16 13 0 15-17 25-23 32Z" fill="url(#heart)" stroke="#ffd090" stroke-linejoin="round" stroke-width="2" filter="url(#glow)"/>
+  <path d="M18 18c2-4 7-5 10-2" fill="none" stroke="#ffd5c7" stroke-linecap="round" stroke-width="3" opacity=".8"/>
+</svg>
