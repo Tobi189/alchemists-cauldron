@@ -1,14 +1,30 @@
 import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import type { GameState } from '../types/game.ts';
+import type { LeaderboardEntry } from '../types/leaderboard.ts';
 import { createCauldron } from './cauldron.ts';
-import { createGameOverDialog, createPauseDialog } from './dialogs.ts';
+import {
+  createClearLeaderboardDialog,
+  createGameOverDialog,
+  createLeaderboardDialog,
+  createPauseDialog,
+} from './dialogs.ts';
 import { createParameterBars } from './parameter-bars.ts';
 import { createRecipePanel } from './recipe.ts';
 import { createShelf } from './shelf.ts';
 
 export interface AppHandlers {
+  readonly leaderboardEntries: readonly LeaderboardEntry[];
+  readonly leaderboardDialog: 'closed' | 'open' | 'confirm-clear';
+  readonly leaderboardNotice: string | undefined;
+  readonly shouldRequestPlayerName: boolean;
   readonly onStartGame: () => void;
   readonly onPlayAgain: () => void;
+  readonly onOpenLeaderboard: () => void;
+  readonly onCloseLeaderboard: () => void;
+  readonly onRequestClearLeaderboard: () => void;
+  readonly onCancelClearLeaderboard: () => void;
+  readonly onConfirmClearLeaderboard: () => void;
+  readonly onSubmitPlayerName: (name: string) => void;
   readonly onPause: () => void;
   readonly onResume: () => void;
   readonly onExitToMenu: () => void;
@@ -123,15 +139,48 @@ export const renderApp = (
   const shell = document.createElement('main');
   const board = document.createElement('div');
   const shelf = createShelf(state, handlers.onAddIngredient);
-  const cauldron = createCauldron(state, handlers.onStartGame, handlers.onBrew);
+  const cauldron = createCauldron(
+    state,
+    handlers.onStartGame,
+    handlers.onBrew,
+    handlers.onOpenLeaderboard,
+  );
   const recipe = createRecipePanel(state);
   const parameterBars = createParameterBars(state);
   const footer = document.createElement('footer');
-  const gameOverDialog = createGameOverDialog(state, handlers.onPlayAgain);
+  const gameOverDialog =
+    handlers.leaderboardDialog === 'closed'
+      ? createGameOverDialog(
+          state,
+          handlers.shouldRequestPlayerName,
+          handlers.onSubmitPlayerName,
+          handlers.onPlayAgain,
+          handlers.onOpenLeaderboard,
+        )
+      : undefined;
   const pauseDialog = createPauseDialog(state, handlers.onResume, handlers.onExitToMenu);
+  const leaderboard =
+    handlers.leaderboardDialog === 'open'
+      ? createLeaderboardDialog(
+          handlers.leaderboardEntries,
+          handlers.leaderboardNotice,
+          handlers.onCloseLeaderboard,
+          handlers.onRequestClearLeaderboard,
+        )
+      : undefined;
+  const clearConfirmation =
+    handlers.leaderboardDialog === 'confirm-clear'
+      ? createClearLeaderboardDialog(
+          handlers.onConfirmClearLeaderboard,
+          handlers.onCancelClearLeaderboard,
+        )
+      : undefined;
 
   shell.className = 'game-shell';
-  shell.inert = state.status === 'paused';
+  shell.inert =
+    state.status === 'paused' ||
+    state.status === 'game-over' ||
+    handlers.leaderboardDialog !== 'closed';
 
   if (state.status === 'paused') {
     shell.classList.add('game-shell--paused');
@@ -146,5 +195,7 @@ export const renderApp = (
     shell,
     ...(pauseDialog ? [pauseDialog] : []),
     ...(gameOverDialog ? [gameOverDialog] : []),
+    ...(leaderboard ? [leaderboard] : []),
+    ...(clearConfirmation ? [clearConfirmation] : []),
   );
 };
