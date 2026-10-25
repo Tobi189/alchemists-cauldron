@@ -44,6 +44,7 @@ export const createCauldron = (
   state: GameState,
   onStartGame: () => void,
   onBrew: () => void,
+  onOpenLeaderboard: () => void,
 ): HTMLElement => {
   const section = document.createElement('section');
   const stage = document.createElement('div');
@@ -79,7 +80,12 @@ export const createCauldron = (
     startButton.type = 'button';
     startButton.textContent = 'Start Game';
     startButton.addEventListener('click', onStartGame);
-    actions.append(startButton);
+    const leaderboardButton = document.createElement('button');
+    leaderboardButton.className = 'secondary-action';
+    leaderboardButton.type = 'button';
+    leaderboardButton.textContent = 'Top Players';
+    leaderboardButton.addEventListener('click', onOpenLeaderboard);
+    actions.append(startButton, leaderboardButton);
   } else {
     const brewButton = document.createElement('button');
     const status = document.createElement('p');
