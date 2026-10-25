@@ -772,13 +772,12 @@ button {
   }
 
   .cauldron__rim {
-    border-color: $magic;
-    box-shadow:
-      inset 0 0.35rem 0.45rem rgba(#fff, 0.18),
-      inset 0 -0.45rem 0.65rem rgba(#000, 0.85),
-      0 0 0 2px $gold-light,
-      0 0 0 5px rgba(#030503, 0.75),
-      0 0 2.8rem rgba($magic, 0.9);
+    filter: drop-shadow(0 0 1.4rem rgba($magic, 0.92));
+  }
+
+  .cauldron__artwork {
+    filter: drop-shadow(0 1.5rem 1.1rem rgba(#000, 0.9)) drop-shadow(0 0 1rem rgba($magic, 0.32))
+      brightness(1.08);
   }
 }
 
@@ -796,39 +795,41 @@ button {
 
 .cauldron {
   position: relative;
-  width: min(88%, 34rem);
-  padding-top: clamp(3.8rem, 7vw, 5.6rem);
+  width: min(98%, 38rem);
+  aspect-ratio: 1;
+}
+
+.cauldron__artwork {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1.5rem 1.1rem rgba(#000, 0.9));
+  pointer-events: none;
+  transition: filter 180ms ease;
 }
 
 .cauldron__rim {
   position: absolute;
   z-index: 4;
-  top: 0;
-  left: 2%;
+  top: 9.5%;
+  left: 17.5%;
   display: grid;
-  width: 96%;
-  min-height: clamp(6.8rem, 11vw, 8.8rem);
-  padding: clamp(0.55rem, 1vw, 0.85rem);
+  width: 65%;
+  aspect-ratio: 3.55;
+  padding: clamp(0.2rem, 0.45vw, 0.4rem);
   place-items: center;
-  border: clamp(0.65rem, 1.4vw, 1.05rem) solid #151b15;
   border-radius: 50%;
-  background:
-    linear-gradient(180deg, rgba(#f1d67d, 0.34), transparent 35%),
-    repeating-linear-gradient(100deg, #172019 0 0.5rem, #2b332a 0.55rem 1rem);
-  box-shadow:
-    inset 0 0.35rem 0.45rem rgba(#fff, 0.12),
-    inset 0 -0.45rem 0.65rem rgba(#000, 0.85),
-    0 0 0 2px rgba($gold, 0.58),
-    0 0 0 5px rgba(#030503, 0.75),
-    0 0.75rem 1.4rem rgba(#000, 0.75),
-    0 0 2.2rem rgba($magic, 0.32);
+  transition: filter 180ms ease;
 }
 
 .cauldron__liquid {
   position: relative;
   display: grid;
   width: 100%;
-  min-height: clamp(4.9rem, 8vw, 6.7rem);
+  height: 100%;
   overflow: hidden;
   place-items: center;
   border: 1px solid rgba(#e8ff9c, 0.7);
@@ -857,88 +858,25 @@ button {
 }
 
 .cauldron__body {
-  position: relative;
-  display: grid;
-  width: 100%;
-  aspect-ratio: 1.22;
-  place-items: center;
-  overflow: visible;
-  border: 2px solid rgba($gold, 0.62);
-  border-radius: 17% 17% 45% 45% / 22% 22% 60% 60%;
-  background:
-    linear-gradient(90deg, rgba(#000, 0.65), transparent 18% 82%, rgba(#000, 0.68)),
-    radial-gradient(ellipse at 50% 18%, rgba(#8c9a83, 0.2), transparent 38%),
-    repeating-linear-gradient(98deg, rgba(#fff, 0.018) 0 0.22rem, transparent 0.25rem 0.8rem),
-    linear-gradient(150deg, #2a332d, #111714 42%, #080c0a 74%, #202823);
-  box-shadow:
-    inset 0 0 0 4px rgba(#030403, 0.6),
-    inset 0 -2rem 3.5rem #000,
-    inset 1.3rem 0 2.5rem rgba(#000, 0.55),
-    inset -1.3rem 0 2.5rem rgba(#000, 0.55),
-    0 1.5rem 1.8rem rgba(#000, 0.72),
-    0 0.8rem 1.5rem rgba($magic, 0.14);
-
-  &::before,
-  &::after {
-    position: absolute;
-    z-index: -1;
-    top: 15%;
-    width: 24%;
-    aspect-ratio: 1;
-    border: clamp(0.55rem, 1.2vw, 0.9rem) solid #141b16;
-    border-radius: 50%;
-    content: '';
-    background: radial-gradient(circle, transparent 50%, rgba($gold, 0.2) 52% 58%, #090d0a 60%);
-    box-shadow:
-      inset 0 0 0 2px rgba($gold, 0.35),
-      0 0.5rem 0.8rem rgba(#000, 0.8);
-  }
-
-  &::before {
-    left: -17%;
-  }
-
-  &::after {
-    right: -17%;
-  }
-}
-
-.cauldron__filigree {
   position: absolute;
-  z-index: 1;
-  inset: 7% 5% 3%;
-  width: 90%;
-  height: 90%;
-  object-fit: contain;
-  filter: drop-shadow(0 0.2rem 0.25rem rgba(#000, 0.75));
-  opacity: 0.72;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  place-items: center;
   pointer-events: none;
 }
 
 .cauldron__emblem {
-  z-index: 2;
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  z-index: 1;
   display: block;
-  width: clamp(5rem, 10vw, 7.3rem);
+  width: clamp(4.6rem, 9.5vw, 7rem);
   aspect-ratio: 1;
   object-fit: contain;
-  filter: drop-shadow(0 0 0.75rem rgba($magic, 0.62));
-}
-
-.cauldron__base {
-  position: relative;
-  z-index: -1;
-  width: 74%;
-  height: clamp(1.6rem, 3.5vw, 2.7rem);
-  margin: clamp(-1.4rem, -2vw, -0.8rem) auto 0;
-  border: 2px solid rgba($gold, 0.38);
-  border-radius: 50%;
-  background:
-    linear-gradient(180deg, #263027, #080b09 70%),
-    repeating-linear-gradient(90deg, transparent 0 1rem, rgba($gold, 0.08) 1rem 1.1rem);
-  box-shadow:
-    inset 0 0.35rem 0.5rem rgba(#fff, 0.08),
-    0 0.8rem 1rem rgba(#000, 0.7),
-    0 0 1rem rgba($magic, 0.16);
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 0.55rem rgba($magic, 0.8)) drop-shadow(0 0 1.3rem rgba($magic, 0.48));
 }
 
 .cauldron__contents {
