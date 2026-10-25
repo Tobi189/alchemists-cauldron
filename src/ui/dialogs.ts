@@ -318,6 +318,8 @@ export const createHelpDialog = (onClose: () => void): HTMLElement => {
     'Select ingredients to add them to the cauldron. Every portion is spent.',
     'Use the three parameter bars to match the active recipe ranges.',
     'Press Brew after adding at least one ingredient.',
+    'During play, use 1–8 for ingredients, B to brew, O to pour out and P to pause.',
+    'On the pause screen, press Enter or Space on the focused Resume button.',
     'A successful brew awards points and time. A failed brew costs one life.',
     'The game ends when time, lives, or all available ingredients run out.',
   ];

@@ -1,5 +1,6 @@
 import './styles/main.scss';
 import { DEFAULT_DIFFICULTY } from './data/difficulty.ts';
+import { INGREDIENTS } from './data/ingredients.ts';
 import { addIngredient } from './logic/add-ingredient.ts';
 import { brewPotion } from './logic/brew-check.ts';
 import { finishGameIfNeeded } from './logic/game-over.ts';
@@ -13,6 +14,7 @@ import { didClearSavedGame, didSaveGame, loadGame } from './storage/save.ts';
 import type { Difficulty, GameState } from './types/game.ts';
 import type { LeaderboardEntry } from './types/leaderboard.ts';
 import { renderApp } from './ui/app.ts';
+import { getGameShortcut } from './ui/keyboard-shortcuts.ts';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
@@ -90,6 +92,54 @@ const startApp = (container: HTMLElement): void => {
 
   const pauseCurrentGame = (): void => {
     const nextState = finishGameIfNeeded(pauseGame(gameState));
+
+    if (nextState === gameState) {
+      return;
+    }
+
+    gameState = nextState;
+    persistCurrentGame();
+    render();
+  };
+
+  const resumeCurrentGame = (): void => {
+    const nextState = resumeGame(gameState);
+
+    if (nextState === gameState) {
+      return;
+    }
+
+    gameState = nextState;
+    persistCurrentGame();
+    render();
+  };
+
+  const addCurrentIngredient = (ingredientId: string): void => {
+    const nextState = finishGameIfNeeded(addIngredient(gameState, ingredientId));
+
+    if (nextState === gameState) {
+      return;
+    }
+
+    gameState = nextState;
+    persistCurrentGame();
+    render();
+  };
+
+  const brewCurrentPotion = (): void => {
+    const nextState = finishGameIfNeeded(brewPotion(gameState));
+
+    if (nextState === gameState) {
+      return;
+    }
+
+    gameState = nextState;
+    persistCurrentGame();
+    render();
+  };
+
+  const pourOutCurrentCauldron = (): void => {
+    const nextState = finishGameIfNeeded(pourOutCauldron(gameState));
 
     if (nextState === gameState) {
       return;
@@ -192,17 +242,7 @@ const startApp = (container: HTMLElement): void => {
         render();
       },
       onPause: pauseCurrentGame,
-      onResume: () => {
-        const nextState = resumeGame(gameState);
-
-        if (nextState === gameState) {
-          return;
-        }
-
-        gameState = nextState;
-        persistCurrentGame();
-        render();
-      },
+      onResume: resumeCurrentGame,
       onExitToMenu: () => {
         gameState = createMenuState(gameState.difficulty);
         didClearSavedGame();
@@ -213,39 +253,9 @@ const startApp = (container: HTMLElement): void => {
         hasHandledCurrentResult = false;
         render();
       },
-      onAddIngredient: (ingredientId) => {
-        const nextState = finishGameIfNeeded(addIngredient(gameState, ingredientId));
-
-        if (nextState === gameState) {
-          return;
-        }
-
-        gameState = nextState;
-        persistCurrentGame();
-        render();
-      },
-      onBrew: () => {
-        const nextState = finishGameIfNeeded(brewPotion(gameState));
-
-        if (nextState === gameState) {
-          return;
-        }
-
-        gameState = nextState;
-        persistCurrentGame();
-        render();
-      },
-      onPourOut: () => {
-        const nextState = finishGameIfNeeded(pourOutCauldron(gameState));
-
-        if (nextState === gameState) {
-          return;
-        }
-
-        gameState = nextState;
-        persistCurrentGame();
-        render();
-      },
+      onAddIngredient: addCurrentIngredient,
+      onBrew: brewCurrentPotion,
+      onPourOut: pourOutCurrentCauldron,
     });
 
     if (gameState.previousCauldronIngredientIds !== gameState.cauldronIngredientIds) {
@@ -257,6 +267,43 @@ const startApp = (container: HTMLElement): void => {
   };
 
   render();
+
+  document.addEventListener('keydown', (event) => {
+    if (gameState.status !== 'playing') {
+      return;
+    }
+
+    const shortcut = getGameShortcut(event);
+
+    if (!shortcut) {
+      return;
+    }
+
+    event.preventDefault();
+
+    switch (shortcut.type) {
+      case 'add-ingredient': {
+        const ingredient = INGREDIENTS[shortcut.ingredientIndex];
+
+        if (ingredient) {
+          addCurrentIngredient(ingredient.id);
+        }
+        break;
+      }
+      case 'brew': {
+        brewCurrentPotion();
+        break;
+      }
+      case 'pour-out': {
+        pourOutCurrentCauldron();
+        break;
+      }
+      case 'pause': {
+        pauseCurrentGame();
+        break;
+      }
+    }
+  });
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {

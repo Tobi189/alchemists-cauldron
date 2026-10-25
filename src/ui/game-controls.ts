@@ -106,15 +106,24 @@ export const createGameControls = (
     );
 
     playActions.className = 'game-controls__play-actions';
+    brewButton.ariaKeyShortcuts = 'B';
+    brewButton.title = 'Keyboard shortcut: B';
+    pourOutButton.ariaKeyShortcuts = 'O';
+    pourOutButton.title = 'Keyboard shortcut: O';
     brewButton.disabled = state.cauldronIngredientIds.length === 0 || state.status !== 'playing';
     pourOutButton.disabled = state.cauldronIngredientIds.length === 0 || state.status !== 'playing';
     playActions.append(brewButton, pourOutButton);
     centerSlot.append(playActions, createBrewStatus(state));
 
     if (state.status === 'playing') {
-      rightSlot.append(
-        createActionButton('Pause', 'secondary-action game-controls__side-action', onPause),
+      const pauseButton = createActionButton(
+        'Pause',
+        'secondary-action game-controls__side-action',
+        onPause,
       );
+      pauseButton.ariaKeyShortcuts = 'P';
+      pauseButton.title = 'Keyboard shortcut: P';
+      rightSlot.append(pauseButton);
     }
   }
 
