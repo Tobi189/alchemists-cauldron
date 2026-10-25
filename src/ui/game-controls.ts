@@ -1,4 +1,5 @@
 import { getDifficultySettings } from '../data/difficulty.ts';
+import { getReactionById } from '../data/reactions.ts';
 import type { GameState } from '../types/game.ts';
 
 const createActionButton = (
@@ -24,7 +25,13 @@ const createBrewStatus = (state: GameState): HTMLElement => {
   status.className = 'game-controls__status';
   status.setAttribute('aria-live', 'polite');
 
-  if (state.lastBrewResult === 'success') {
+  if (state.lastReactionIds.length > 0) {
+    const reactionNames = state.lastReactionIds
+      .map((reactionId) => getReactionById(reactionId)?.name)
+      .filter((name) => name !== undefined);
+    status.classList.add('game-controls__status--reaction');
+    status.textContent = `Reaction: ${reactionNames.join(', ')}`;
+  } else if (state.lastBrewResult === 'success') {
     status.classList.add('game-controls__status--success');
     status.textContent = `Successful brew: +${rules.scorePerBrew} points`;
   } else if (state.lastBrewResult === 'failure') {
@@ -32,6 +39,11 @@ const createBrewStatus = (state: GameState): HTMLElement => {
     status.textContent = 'The mixture failed: one life lost';
   } else if (count === rules.cauldronCapacity) {
     status.textContent = 'Maximum capacity reached';
+  } else if (state.enabledReactionIds.length > 0) {
+    const reactionNames = state.enabledReactionIds
+      .map((reactionId) => getReactionById(reactionId)?.name)
+      .filter((name) => name !== undefined);
+    status.textContent = `Enabled reactions: ${reactionNames.join(', ')}`;
   } else {
     status.textContent = 'Select ingredients, match all three parameters, then brew';
   }

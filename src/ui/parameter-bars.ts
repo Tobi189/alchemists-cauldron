@@ -1,5 +1,5 @@
-import { calculateCauldronValues } from '../logic/calculate-cauldron.ts';
 import { isValueInRange } from '../logic/range.ts';
+import { calculateReactedCauldronValues } from '../logic/reactions.ts';
 import type { GameState, ParameterValues, RecipeRange } from '../types/game.ts';
 
 type ParameterKey = keyof ParameterValues;
@@ -123,8 +123,14 @@ const createParameterBar = (
 export const createParameterBars = (state: GameState): HTMLElement => {
   const section = document.createElement('section');
   const heading = document.createElement('h2');
-  const values = calculateCauldronValues(state.cauldronIngredientIds);
-  const previousValues = calculateCauldronValues(state.previousCauldronIngredientIds);
+  const values = calculateReactedCauldronValues(
+    state.cauldronIngredientIds,
+    state.enabledReactionIds,
+  );
+  const previousValues = calculateReactedCauldronValues(
+    state.previousCauldronIngredientIds,
+    state.enabledReactionIds,
+  );
 
   section.className = 'parameter-panel';
   heading.className = 'visually-hidden';

@@ -1,6 +1,7 @@
 import { DEFAULT_DIFFICULTY, getDifficultySettings } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
 import { selectRandomRecipe } from '../logic/recipe-generator.ts';
+import { selectRandomReactionIds } from '../data/reactions.ts';
 import { createShelfStock } from '../logic/stock.ts';
 import type { Difficulty, GameState, RandomSource, TimestampSource } from '../types/game.ts';
 
@@ -14,6 +15,8 @@ export const createMenuState = (difficulty: Difficulty = DEFAULT_DIFFICULTY): Ga
   gameOverReason: undefined,
   activeRecipe: undefined,
   lastBrewResult: undefined,
+  enabledReactionIds: [],
+  lastReactionIds: [],
   shelfStock: {},
   cauldronIngredientIds: [],
   previousCauldronIngredientIds: [],
@@ -37,6 +40,8 @@ export const createNewGameState = (
     gameOverReason: undefined,
     activeRecipe: selectRandomRecipe(difficulty, random),
     lastBrewResult: undefined,
+    enabledReactionIds: selectRandomReactionIds(rules.reactionCount, difficulty, random),
+    lastReactionIds: [],
     shelfStock: createShelfStock(INGREDIENTS, rules.shelfSize, random),
     cauldronIngredientIds: [],
     previousCauldronIngredientIds: [],

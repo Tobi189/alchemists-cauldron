@@ -1,6 +1,7 @@
 import { getDifficultySettings } from '../data/difficulty.ts';
+import { applyReactionTransition } from './reactions.ts';
 import { decreaseIngredientStock } from './stock.ts';
-import type { GameState } from '../types/game.ts';
+import type { GameState, TimestampSource } from '../types/game.ts';
 
 export const canAddIngredient = (state: GameState, ingredientId: string): boolean => {
   const rules = getDifficultySettings(state.difficulty);
@@ -12,16 +13,24 @@ export const canAddIngredient = (state: GameState, ingredientId: string): boolea
   );
 };
 
-export const addIngredient = (state: GameState, ingredientId: string): GameState => {
+export const addIngredient = (
+  state: GameState,
+  ingredientId: string,
+  getTimestamp: TimestampSource = Date.now,
+): GameState => {
   if (!canAddIngredient(state, ingredientId)) {
     return state;
   }
 
-  return {
+  const nextState = {
     ...state,
     lastBrewResult: undefined,
     shelfStock: decreaseIngredientStock(state.shelfStock, ingredientId),
-    previousCauldronIngredientIds: state.cauldronIngredientIds,
-    cauldronIngredientIds: [...state.cauldronIngredientIds, ingredientId],
   };
+
+  return applyReactionTransition(
+    nextState,
+    [...state.cauldronIngredientIds, ingredientId],
+    getTimestamp,
+  );
 };
