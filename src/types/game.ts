@@ -1,7 +1,9 @@
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type GameStatus = 'menu' | 'playing' | 'paused' | 'game-over';
 export type BrewResult = 'success' | 'failure';
+export type GameOverReason = 'time' | 'lives' | 'ingredients';
 export type RandomSource = () => number;
+export type TimestampSource = () => number;
 
 export type ShelfStock = Readonly<Record<string, number>>;
 
@@ -50,7 +52,9 @@ export interface GameState {
   readonly status: GameStatus;
   readonly score: number;
   readonly timeLeft: number;
+  readonly timerEndsAt: number | undefined;
   readonly lives: number;
+  readonly gameOverReason: GameOverReason | undefined;
   readonly activeRecipe: Recipe | undefined;
   readonly lastBrewResult: BrewResult | undefined;
   readonly shelfStock: ShelfStock;

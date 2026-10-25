@@ -1,6 +1,8 @@
 import './styles/main.scss';
 import { addIngredient } from './logic/add-ingredient.ts';
 import { brewPotion } from './logic/brew-check.ts';
+import { finishGameIfNeeded } from './logic/game-over.ts';
+import { syncTimer } from './logic/timer.ts';
 import { createMenuState, createNewGameState } from './state/game-state.ts';
 import type { GameState } from './types/game.ts';
 import { renderApp } from './ui/app.ts';
@@ -20,8 +22,12 @@ const startApp = (container: HTMLElement): void => {
         gameState = createNewGameState();
         render();
       },
+      onPlayAgain: () => {
+        gameState = createNewGameState();
+        render();
+      },
       onAddIngredient: (ingredientId) => {
-        const nextState = addIngredient(gameState, ingredientId);
+        const nextState = finishGameIfNeeded(addIngredient(gameState, ingredientId));
 
         if (nextState === gameState) {
           return;
@@ -31,7 +37,7 @@ const startApp = (container: HTMLElement): void => {
         render();
       },
       onBrew: () => {
-        const nextState = brewPotion(gameState);
+        const nextState = finishGameIfNeeded(brewPotion(gameState));
 
         if (nextState === gameState) {
           return;
@@ -41,9 +47,27 @@ const startApp = (container: HTMLElement): void => {
         render();
       },
     });
+
+    if (gameState.previousCauldronIngredientIds !== gameState.cauldronIngredientIds) {
+      gameState = {
+        ...gameState,
+        previousCauldronIngredientIds: gameState.cauldronIngredientIds,
+      };
+    }
   };
 
   render();
+
+  globalThis.setInterval(() => {
+    const nextState = finishGameIfNeeded(syncTimer(gameState));
+
+    if (nextState === gameState) {
+      return;
+    }
+
+    gameState = nextState;
+    render();
+  }, 250);
 };
 
 startApp(app);
