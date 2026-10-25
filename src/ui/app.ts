@@ -1,15 +1,17 @@
 import clockIconUrl from '../assets/ui/clock.svg';
 import heartIconUrl from '../assets/ui/heart.svg';
 import scoreIconUrl from '../assets/ui/score-emblem.svg';
-import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
-import type { GameState } from '../types/game.ts';
+import { getDifficultySettings } from '../data/difficulty.ts';
+import type { Difficulty, GameState } from '../types/game.ts';
 import type { LeaderboardEntry } from '../types/leaderboard.ts';
 import { createCauldron } from './cauldron.ts';
 import {
   createClearLeaderboardDialog,
+  createHelpDialog,
   createGameOverDialog,
   createLeaderboardDialog,
   createPauseDialog,
+  createSettingsDialog,
 } from './dialogs.ts';
 import { createGameControls } from './game-controls.ts';
 import { createParameterBars } from './parameter-bars.ts';
@@ -18,17 +20,24 @@ import { createShelf } from './shelf.ts';
 
 export interface AppHandlers {
   readonly leaderboardEntries: readonly LeaderboardEntry[];
+  readonly leaderboardDifficulty: Difficulty;
   readonly leaderboardDialog: 'closed' | 'open' | 'confirm-clear';
+  readonly menuDialog: 'closed' | 'help' | 'settings';
   readonly leaderboardNotice: string | undefined;
   readonly shouldRequestPlayerName: boolean;
   readonly onStartGame: () => void;
   readonly onPlayAgain: () => void;
   readonly onOpenLeaderboard: () => void;
+  readonly onSelectLeaderboardDifficulty: (difficulty: Difficulty) => void;
   readonly onCloseLeaderboard: () => void;
   readonly onRequestClearLeaderboard: () => void;
   readonly onCancelClearLeaderboard: () => void;
   readonly onConfirmClearLeaderboard: () => void;
   readonly onSubmitPlayerName: (name: string) => void;
+  readonly onOpenHelp: () => void;
+  readonly onOpenSettings: () => void;
+  readonly onCloseMenuDialog: () => void;
+  readonly onSelectDifficulty: (difficulty: Difficulty) => void;
   readonly onPause: () => void;
   readonly onResume: () => void;
   readonly onExitToMenu: () => void;
@@ -68,7 +77,8 @@ const createTimerHud = (state: GameState): HTMLElement => {
   const timerText = createHudItem('Time', formatTime(state.timeLeft), clockIconUrl);
   const progress = document.createElement('div');
   const fill = document.createElement('span');
-  const progressPercentage = (state.timeLeft / LEVEL_ONE_RULES.startingTimeSeconds) * 100;
+  const rules = getDifficultySettings(state.difficulty);
+  const progressPercentage = (state.timeLeft / rules.startingTimeSeconds) * 100;
 
   timer.className = 'hud__timer';
   progress.className = 'hud__timer-progress';
@@ -76,7 +86,7 @@ const createTimerHud = (state: GameState): HTMLElement => {
   progress.setAttribute('role', 'progressbar');
   progress.setAttribute('aria-label', 'Remaining time');
   progress.setAttribute('aria-valuemin', '0');
-  progress.setAttribute('aria-valuemax', String(LEVEL_ONE_RULES.startingTimeSeconds));
+  progress.setAttribute('aria-valuemax', String(rules.startingTimeSeconds));
   progress.setAttribute('aria-valuenow', String(state.timeLeft));
   fill.style.setProperty('--timer-progress', `${progressPercentage}%`);
 
@@ -158,6 +168,8 @@ export const renderApp = (
     handlers.onStartGame,
     handlers.onBrew,
     handlers.onOpenLeaderboard,
+    handlers.onOpenHelp,
+    handlers.onOpenSettings,
     handlers.onPause,
   );
   const footer = document.createElement('footer');
@@ -176,14 +188,27 @@ export const renderApp = (
     handlers.leaderboardDialog === 'open'
       ? createLeaderboardDialog(
           handlers.leaderboardEntries,
+          handlers.leaderboardDifficulty,
           handlers.leaderboardNotice,
+          handlers.onSelectLeaderboardDifficulty,
           handlers.onCloseLeaderboard,
           handlers.onRequestClearLeaderboard,
+        )
+      : undefined;
+  const helpDialog =
+    handlers.menuDialog === 'help' ? createHelpDialog(handlers.onCloseMenuDialog) : undefined;
+  const settingsDialog =
+    handlers.menuDialog === 'settings'
+      ? createSettingsDialog(
+          state.difficulty,
+          handlers.onSelectDifficulty,
+          handlers.onCloseMenuDialog,
         )
       : undefined;
   const clearConfirmation =
     handlers.leaderboardDialog === 'confirm-clear'
       ? createClearLeaderboardDialog(
+          handlers.leaderboardDifficulty,
           handlers.onConfirmClearLeaderboard,
           handlers.onCancelClearLeaderboard,
         )
@@ -193,7 +218,8 @@ export const renderApp = (
   shell.inert =
     state.status === 'paused' ||
     state.status === 'game-over' ||
-    handlers.leaderboardDialog !== 'closed';
+    handlers.leaderboardDialog !== 'closed' ||
+    handlers.menuDialog !== 'closed';
 
   if (state.status === 'paused') {
     shell.classList.add('game-shell--paused');
@@ -210,5 +236,7 @@ export const renderApp = (
     ...(gameOverDialog ? [gameOverDialog] : []),
     ...(leaderboard ? [leaderboard] : []),
     ...(clearConfirmation ? [clearConfirmation] : []),
+    ...(helpDialog ? [helpDialog] : []),
+    ...(settingsDialog ? [settingsDialog] : []),
   );
 };

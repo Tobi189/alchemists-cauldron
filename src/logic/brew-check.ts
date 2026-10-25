@@ -1,4 +1,4 @@
-import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
+import { getDifficultySettings } from '../data/difficulty.ts';
 import { calculateCauldronValues } from './calculate-cauldron.ts';
 import { isValueInRange } from './range.ts';
 import { selectRandomRecipe } from './recipe-generator.ts';
@@ -35,13 +35,14 @@ export const brewPotion = (
 
   const timestamp = getTimestamp();
   const timeLeft = getRemainingTime(state, () => timestamp);
+  const rules = getDifficultySettings(state.difficulty);
 
   if (timeLeft === 0) {
     return { ...state, timeLeft };
   }
 
   const values = calculateCauldronValues(state.cauldronIngredientIds);
-  const isSuccess = isSuccessfulBrew(values, state.activeRecipe, LEVEL_ONE_RULES.recipeTolerance);
+  const isSuccess = isSuccessfulBrew(values, state.activeRecipe, rules.recipeTolerance);
   const clearedState = {
     ...state,
     timeLeft,
@@ -50,17 +51,14 @@ export const brewPotion = (
   };
 
   if (isSuccess) {
-    const nextTimeLeft = Math.min(
-      timeLeft + LEVEL_ONE_RULES.timeBonusSeconds,
-      LEVEL_ONE_RULES.startingTimeSeconds,
-    );
+    const nextTimeLeft = Math.min(timeLeft + rules.timeBonusSeconds, rules.startingTimeSeconds);
 
     return {
       ...clearedState,
-      score: state.score + LEVEL_ONE_RULES.scorePerBrew,
+      score: state.score + rules.scorePerBrew,
       timeLeft: nextTimeLeft,
       timerEndsAt: timestamp + nextTimeLeft * 1000,
-      activeRecipe: selectRandomRecipe(LEVEL_ONE_RULES.difficulty, random),
+      activeRecipe: selectRandomRecipe(state.difficulty, random),
       lastBrewResult: 'success',
     };
   }

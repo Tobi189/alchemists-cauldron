@@ -1,4 +1,5 @@
 import './styles/main.scss';
+import { DEFAULT_DIFFICULTY } from './data/difficulty.ts';
 import { addIngredient } from './logic/add-ingredient.ts';
 import { brewPotion } from './logic/brew-check.ts';
 import { finishGameIfNeeded } from './logic/game-over.ts';
@@ -7,7 +8,7 @@ import { pauseGame, resumeGame } from './logic/pause.ts';
 import { syncTimer } from './logic/timer.ts';
 import { createMenuState, createNewGameState } from './state/game-state.ts';
 import { didClearLeaderboard, didSaveLeaderboard, loadLeaderboard } from './storage/leaderboard.ts';
-import type { GameState } from './types/game.ts';
+import type { Difficulty, GameState } from './types/game.ts';
 import type { LeaderboardEntry } from './types/leaderboard.ts';
 import { renderApp } from './ui/app.ts';
 
@@ -19,14 +20,21 @@ if (!app) {
 
 const startApp = (container: HTMLElement): void => {
   let gameState: GameState = createMenuState();
-  let leaderboardEntries: readonly LeaderboardEntry[] = loadLeaderboard();
+  let leaderboards: Readonly<Record<Difficulty, readonly LeaderboardEntry[]>> = {
+    easy: loadLeaderboard('easy'),
+    medium: loadLeaderboard('medium'),
+    hard: loadLeaderboard('hard'),
+  };
+  let leaderboardDifficulty: Difficulty = DEFAULT_DIFFICULTY;
   let leaderboardDialog: 'closed' | 'open' | 'confirm-clear' = 'closed';
+  let menuDialog: 'closed' | 'help' | 'settings' = 'closed';
   let leaderboardNotice: string | undefined;
   let hasHandledCurrentResult = false;
 
   const startNewGame = (): void => {
-    gameState = createNewGameState();
+    gameState = createNewGameState(gameState.difficulty);
     leaderboardDialog = 'closed';
+    menuDialog = 'closed';
     leaderboardNotice = undefined;
     hasHandledCurrentResult = false;
     render();
@@ -44,18 +52,29 @@ const startApp = (container: HTMLElement): void => {
   };
 
   const render = (): void => {
+    const currentLeaderboard = leaderboards[gameState.difficulty];
+
     renderApp(container, gameState, {
-      leaderboardEntries,
+      leaderboardEntries: leaderboards[leaderboardDifficulty],
+      leaderboardDifficulty,
       leaderboardDialog,
+      menuDialog,
       leaderboardNotice,
       shouldRequestPlayerName:
         gameState.status === 'game-over' &&
         !hasHandledCurrentResult &&
-        isTopTenScore(gameState.score, leaderboardEntries),
+        isTopTenScore(gameState.score, currentLeaderboard),
       onStartGame: startNewGame,
       onPlayAgain: startNewGame,
       onOpenLeaderboard: () => {
+        leaderboardDifficulty = gameState.difficulty;
         leaderboardDialog = 'open';
+        menuDialog = 'closed';
+        leaderboardNotice = undefined;
+        render();
+      },
+      onSelectLeaderboardDifficulty: (difficulty) => {
+        leaderboardDifficulty = difficulty;
         leaderboardNotice = undefined;
         render();
       },
@@ -73,9 +92,9 @@ const startApp = (container: HTMLElement): void => {
         render();
       },
       onConfirmClearLeaderboard: () => {
-        if (didClearLeaderboard()) {
-          leaderboardEntries = [];
-          leaderboardNotice = 'Leaderboard cleared.';
+        if (didClearLeaderboard(leaderboardDifficulty)) {
+          leaderboards = { ...leaderboards, [leaderboardDifficulty]: [] };
+          leaderboardNotice = `${leaderboardDifficulty} leaderboard cleared.`;
         } else {
           leaderboardNotice = 'The leaderboard could not be cleared in this browser.';
         }
@@ -84,12 +103,41 @@ const startApp = (container: HTMLElement): void => {
         render();
       },
       onSubmitPlayerName: (name) => {
-        leaderboardEntries = addLeaderboardEntry(leaderboardEntries, name, gameState.score);
+        const difficulty = gameState.difficulty;
+        const nextEntries = addLeaderboardEntry(
+          leaderboards[difficulty],
+          name,
+          gameState.score,
+          difficulty,
+        );
+        leaderboards = { ...leaderboards, [difficulty]: nextEntries };
+        leaderboardDifficulty = difficulty;
         hasHandledCurrentResult = true;
-        leaderboardNotice = didSaveLeaderboard(leaderboardEntries)
+        leaderboardNotice = didSaveLeaderboard(difficulty, nextEntries)
           ? 'Your result was added to the Top 10.'
           : 'Your result could not be saved in this browser.';
         leaderboardDialog = 'open';
+        render();
+      },
+      onOpenHelp: () => {
+        menuDialog = 'help';
+        render();
+      },
+      onOpenSettings: () => {
+        menuDialog = 'settings';
+        render();
+      },
+      onCloseMenuDialog: () => {
+        menuDialog = 'closed';
+        render();
+      },
+      onSelectDifficulty: (difficulty) => {
+        if (gameState.status !== 'menu') {
+          return;
+        }
+
+        gameState = createMenuState(difficulty);
+        leaderboardDifficulty = difficulty;
         render();
       },
       onPause: pauseCurrentGame,
@@ -104,8 +152,9 @@ const startApp = (container: HTMLElement): void => {
         render();
       },
       onExitToMenu: () => {
-        gameState = createMenuState();
+        gameState = createMenuState(gameState.difficulty);
         leaderboardDialog = 'closed';
+        menuDialog = 'closed';
         leaderboardNotice = undefined;
         hasHandledCurrentResult = false;
         render();

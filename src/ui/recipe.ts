@@ -2,7 +2,7 @@ import densityIconUrl from '../assets/ui/density.svg';
 import magicIconUrl from '../assets/ui/magic.svg';
 import potionSketchUrl from '../assets/ui/potion-sketch.svg';
 import temperatureIconUrl from '../assets/ui/temperature.svg';
-import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
+import { getDifficultySettings } from '../data/difficulty.ts';
 import type { GameState, RecipeRange } from '../types/game.ts';
 
 const formatRange = (range: RecipeRange): string => `${range.min}–${range.max}`;
@@ -38,6 +38,7 @@ export const createRecipePanel = (state: GameState): HTMLElement => {
   const content = document.createElement('div');
   const counter = document.createElement('p');
   const count = state.cauldronIngredientIds.length;
+  const rules = getDifficultySettings(state.difficulty);
 
   panel.className = 'recipe-panel';
   eyebrow.className = 'recipe-panel__eyebrow';
@@ -49,7 +50,7 @@ export const createRecipePanel = (state: GameState): HTMLElement => {
   content.className = 'recipe-panel__content';
   counter.className = 'recipe-panel__counter';
   eyebrow.textContent = 'Current Recipe';
-  counter.textContent = `Ingredients: ${count} / ${LEVEL_ONE_RULES.cauldronCapacity}`;
+  counter.textContent = `Ingredients: ${count} / ${rules.cauldronCapacity}`;
 
   if (state.activeRecipe) {
     title.textContent = state.activeRecipe.name;
@@ -82,7 +83,7 @@ export const createRecipePanel = (state: GameState): HTMLElement => {
     content.append(message);
   }
 
-  if (count === LEVEL_ONE_RULES.cauldronCapacity) {
+  if (count === rules.cauldronCapacity) {
     counter.classList.add('recipe-panel__counter--full');
   }
 
