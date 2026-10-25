@@ -1,3 +1,6 @@
+import clockIconUrl from '../assets/ui/clock.svg';
+import heartIconUrl from '../assets/ui/heart.svg';
+import scoreIconUrl from '../assets/ui/score-emblem.svg';
 import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import type { GameState } from '../types/game.ts';
 import type { LeaderboardEntry } from '../types/leaderboard.ts';
@@ -8,6 +11,7 @@ import {
   createLeaderboardDialog,
   createPauseDialog,
 } from './dialogs.ts';
+import { createGameControls } from './game-controls.ts';
 import { createParameterBars } from './parameter-bars.ts';
 import { createRecipePanel } from './recipe.ts';
 import { createShelf } from './shelf.ts';
@@ -39,24 +43,29 @@ const formatTime = (totalSeconds: number): string => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-const createHudItem = (label: string, value: string): HTMLElement => {
+const createHudItem = (label: string, value: string, iconUrl: string): HTMLElement => {
   const item = document.createElement('div');
+  const icon = document.createElement('img');
   const itemLabel = document.createElement('span');
   const itemValue = document.createElement('strong');
 
   item.className = 'hud__item';
+  icon.className = 'hud__icon';
+  icon.src = iconUrl;
+  icon.alt = '';
+  icon.setAttribute('aria-hidden', 'true');
   itemLabel.className = 'hud__label';
   itemValue.className = 'hud__value';
   itemLabel.textContent = label;
   itemValue.textContent = value;
-  item.append(itemLabel, itemValue);
+  item.append(icon, itemLabel, itemValue);
 
   return item;
 };
 
 const createTimerHud = (state: GameState): HTMLElement => {
   const timer = document.createElement('div');
-  const timerText = createHudItem('Time', formatTime(state.timeLeft));
+  const timerText = createHudItem('Time', formatTime(state.timeLeft), clockIconUrl);
   const progress = document.createElement('div');
   const fill = document.createElement('span');
   const progressPercentage = (state.timeLeft / LEVEL_ONE_RULES.startingTimeSeconds) * 100;
@@ -81,28 +90,30 @@ const createTimerHud = (state: GameState): HTMLElement => {
   return timer;
 };
 
-const createHeader = (state: GameState, onPause: () => void): HTMLElement => {
+const createHeader = (state: GameState): HTMLElement => {
   const header = document.createElement('header');
-  const score = createHudItem('Score', String(state.score));
+  const frame = document.createElement('div');
+  const hud = document.createElement('div');
+  const score = createHudItem('Score', String(state.score), scoreIconUrl);
   const titleGroup = document.createElement('div');
-  const eyebrow = document.createElement('span');
   const title = document.createElement('h1');
   const time = createTimerHud(state);
 
+  const lives = document.createElement('div');
+
   header.className = 'game-header';
+  frame.className = 'game-header__frame';
+  hud.className = 'game-header__hud';
+  score.classList.add('hud__score');
   titleGroup.className = 'game-header__title-group';
-  eyebrow.className = 'game-header__eyebrow';
   title.className = 'game-header__title';
-  eyebrow.textContent = 'The Arcane Workshop';
   title.textContent = "Alchemist's Cauldron";
-  titleGroup.append(eyebrow, title);
+  titleGroup.append(title);
 
-  const rightHud = document.createElement('div');
-  rightHud.className = 'hud__right';
-  rightHud.append(time);
-
-  if (state.status !== 'menu') {
-    const lives = document.createElement('div');
+  if (state.status === 'menu') {
+    lives.className = 'hud__lives hud__lives--empty';
+    lives.setAttribute('aria-hidden', 'true');
+  } else {
     const livesLabel = document.createElement('span');
     const hearts = document.createElement('span');
 
@@ -110,23 +121,23 @@ const createHeader = (state: GameState, onPause: () => void): HTMLElement => {
     livesLabel.className = 'visually-hidden';
     hearts.className = 'hud__hearts';
     livesLabel.textContent = 'Lives';
-    hearts.textContent = '♥'.repeat(state.lives);
     hearts.setAttribute('aria-label', `${state.lives} lives remaining`);
+
+    for (let life = 0; life < state.lives; life += 1) {
+      const heart = document.createElement('img');
+      heart.className = 'hud__heart';
+      heart.src = heartIconUrl;
+      heart.alt = '';
+      heart.setAttribute('aria-hidden', 'true');
+      hearts.append(heart);
+    }
+
     lives.append(livesLabel, hearts);
-    rightHud.append(lives);
   }
 
-  if (state.status === 'playing') {
-    const pauseButton = document.createElement('button');
-
-    pauseButton.className = 'secondary-action hud__pause';
-    pauseButton.type = 'button';
-    pauseButton.textContent = 'Pause';
-    pauseButton.addEventListener('click', onPause);
-    rightHud.append(pauseButton);
-  }
-
-  header.append(score, titleGroup, rightHud);
+  hud.append(score, time, lives);
+  frame.append(hud);
+  header.append(frame, titleGroup);
 
   return header;
 };
@@ -139,14 +150,16 @@ export const renderApp = (
   const shell = document.createElement('main');
   const board = document.createElement('div');
   const shelf = createShelf(state, handlers.onAddIngredient);
-  const cauldron = createCauldron(
+  const cauldron = createCauldron(state);
+  const recipe = createRecipePanel(state);
+  const parameterBars = createParameterBars(state);
+  const gameControls = createGameControls(
     state,
     handlers.onStartGame,
     handlers.onBrew,
     handlers.onOpenLeaderboard,
+    handlers.onPause,
   );
-  const recipe = createRecipePanel(state);
-  const parameterBars = createParameterBars(state);
   const footer = document.createElement('footer');
   const gameOverDialog =
     handlers.leaderboardDialog === 'closed'
@@ -190,7 +203,7 @@ export const renderApp = (
   footer.textContent = 'Choose ingredients carefully. Every portion is spent.';
 
   board.append(shelf, cauldron, recipe);
-  shell.append(createHeader(state, handlers.onPause), board, parameterBars, footer);
+  shell.append(createHeader(state), board, parameterBars, gameControls, footer);
   container.replaceChildren(
     shell,
     ...(pauseDialog ? [pauseDialog] : []),
