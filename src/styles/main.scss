@@ -69,6 +69,16 @@ button {
   margin: 0 auto;
 }
 
+.game-shell--paused {
+  .game-board,
+  .parameter-panel,
+  .game-footer {
+    filter: blur(0.8rem);
+    opacity: 0.24;
+    user-select: none;
+  }
+}
+
 .game-header {
   display: grid;
   grid-template-columns: minmax(9rem, 1fr) minmax(18rem, 2fr) minmax(12rem, 1fr);
@@ -141,6 +151,60 @@ button {
   gap: clamp(0.75rem, 2vw, 1.5rem);
   align-items: center;
   justify-content: flex-end;
+}
+
+.hud__pause {
+  min-height: 2.6rem;
+  padding: 0.55rem 0.9rem;
+  white-space: nowrap;
+}
+
+.hud__timer {
+  display: grid;
+  gap: 0.3rem;
+  min-width: clamp(7.5rem, 11vw, 10rem);
+}
+
+.hud__timer-progress {
+  width: 100%;
+  height: 0.38rem;
+  overflow: hidden;
+  border: 1px solid rgba($gold, 0.62);
+  border-radius: 999px;
+  background: rgba(#000, 0.72);
+}
+
+.hud__timer-fill {
+  display: block;
+  width: var(--timer-progress);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4e8f20, $magic);
+  box-shadow: 0 0 0.5rem rgba($magic, 0.65);
+  transition: width 250ms linear;
+}
+
+.hud__timer--urgent {
+  .hud__value {
+    color: #ff5f4e;
+  }
+
+  .hud__timer-fill {
+    background: #e73e2f;
+    box-shadow: 0 0 0.65rem rgba(#ff3d2d, 0.85);
+  }
+
+  animation: urgent-timer-pulse 800ms ease-in-out infinite alternate;
+}
+
+@keyframes urgent-timer-pulse {
+  from {
+    filter: brightness(1);
+  }
+
+  to {
+    filter: brightness(1.45);
+  }
 }
 
 .hud__lives {
@@ -544,6 +608,29 @@ button {
   }
 }
 
+.secondary-action {
+  min-height: 3rem;
+  padding: 0.7rem 1.25rem;
+  border: 1px solid rgba($gold-light, 0.78);
+  border-radius: 0.35rem;
+  color: $gold-light;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(#40331d, 0.96), rgba(#17130d, 0.98));
+  box-shadow: inset 0 0 0.75rem rgba($gold, 0.12);
+
+  &:hover,
+  &:focus-visible {
+    border-color: #fff1b0;
+    outline: 2px solid rgba($gold-light, 0.7);
+    outline-offset: 0.2rem;
+    filter: brightness(1.18);
+  }
+}
+
 .cauldron-area__status {
   margin: 0.55rem 0 0;
   color: $muted-ink;
@@ -841,6 +928,76 @@ button {
   text-align: center;
 }
 
+.dialog-overlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  padding: 1rem;
+  place-items: center;
+  background: rgba(#020402, 0.82);
+  backdrop-filter: blur(0.45rem);
+}
+
+.game-over-dialog {
+  width: min(100%, 34rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid rgba($gold-light, 0.82);
+  border-radius: 0.8rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 0, rgba($magic, 0.12), transparent 45%),
+    linear-gradient(180deg, #182019, #080c09);
+  box-shadow:
+    inset 0 0 0 4px rgba(#000, 0.52),
+    0 0 2.5rem rgba(#000, 0.78),
+    0 0 1.2rem rgba($gold, 0.2);
+}
+
+.game-over-dialog__eyebrow {
+  margin: 0 0 0.6rem;
+  color: $gold-light;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.game-over-dialog__title {
+  margin: 0;
+  color: #ff8069;
+  font-size: clamp(2.3rem, 8vw, 4.5rem);
+  font-weight: 500;
+  line-height: 1;
+  text-shadow: 0 0 1.2rem rgba(#e33b2c, 0.42);
+}
+
+.game-over-dialog__reason {
+  margin: 1.3rem 0 0;
+  color: $muted-ink;
+  font-size: 1.05rem;
+}
+
+.game-over-dialog__score {
+  margin: 1rem 0 1.6rem;
+  color: $magic;
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.pause-dialog__title {
+  color: $magic;
+  font-size: clamp(2rem, 7vw, 4rem);
+  text-shadow: 0 0 1.2rem rgba($magic, 0.42);
+}
+
+.pause-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: center;
+  margin-top: 1.6rem;
+}
+
 @media (max-width: 1100px) {
   .game-board {
     grid-template-columns: minmax(15rem, 0.85fr) minmax(19rem, 1.15fr);
@@ -927,6 +1084,12 @@ button {
 
   .hud__right {
     gap: 0.45rem;
+  }
+
+  .hud__pause {
+    min-height: 2.2rem;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.72rem;
   }
 
   .hud__label {

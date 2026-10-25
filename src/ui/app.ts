@@ -1,11 +1,17 @@
+import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import type { GameState } from '../types/game.ts';
 import { createCauldron } from './cauldron.ts';
+import { createGameOverDialog, createPauseDialog } from './dialogs.ts';
 import { createParameterBars } from './parameter-bars.ts';
 import { createRecipePanel } from './recipe.ts';
 import { createShelf } from './shelf.ts';
 
 export interface AppHandlers {
   readonly onStartGame: () => void;
+  readonly onPlayAgain: () => void;
+  readonly onPause: () => void;
+  readonly onResume: () => void;
+  readonly onExitToMenu: () => void;
   readonly onAddIngredient: (ingredientId: string) => void;
   readonly onBrew: () => void;
 }
@@ -32,13 +38,40 @@ const createHudItem = (label: string, value: string): HTMLElement => {
   return item;
 };
 
-const createHeader = (state: GameState): HTMLElement => {
+const createTimerHud = (state: GameState): HTMLElement => {
+  const timer = document.createElement('div');
+  const timerText = createHudItem('Time', formatTime(state.timeLeft));
+  const progress = document.createElement('div');
+  const fill = document.createElement('span');
+  const progressPercentage = (state.timeLeft / LEVEL_ONE_RULES.startingTimeSeconds) * 100;
+
+  timer.className = 'hud__timer';
+  progress.className = 'hud__timer-progress';
+  fill.className = 'hud__timer-fill';
+  progress.setAttribute('role', 'progressbar');
+  progress.setAttribute('aria-label', 'Remaining time');
+  progress.setAttribute('aria-valuemin', '0');
+  progress.setAttribute('aria-valuemax', String(LEVEL_ONE_RULES.startingTimeSeconds));
+  progress.setAttribute('aria-valuenow', String(state.timeLeft));
+  fill.style.setProperty('--timer-progress', `${progressPercentage}%`);
+
+  if (state.status === 'playing' && state.timeLeft > 0 && state.timeLeft < 15) {
+    timer.classList.add('hud__timer--urgent');
+  }
+
+  progress.append(fill);
+  timer.append(timerText, progress);
+
+  return timer;
+};
+
+const createHeader = (state: GameState, onPause: () => void): HTMLElement => {
   const header = document.createElement('header');
   const score = createHudItem('Score', String(state.score));
   const titleGroup = document.createElement('div');
   const eyebrow = document.createElement('span');
   const title = document.createElement('h1');
-  const time = createHudItem('Time', formatTime(state.timeLeft));
+  const time = createTimerHud(state);
 
   header.className = 'game-header';
   titleGroup.className = 'game-header__title-group';
@@ -67,6 +100,16 @@ const createHeader = (state: GameState): HTMLElement => {
     rightHud.append(lives);
   }
 
+  if (state.status === 'playing') {
+    const pauseButton = document.createElement('button');
+
+    pauseButton.className = 'secondary-action hud__pause';
+    pauseButton.type = 'button';
+    pauseButton.textContent = 'Pause';
+    pauseButton.addEventListener('click', onPause);
+    rightHud.append(pauseButton);
+  }
+
   header.append(score, titleGroup, rightHud);
 
   return header;
@@ -84,13 +127,24 @@ export const renderApp = (
   const recipe = createRecipePanel(state);
   const parameterBars = createParameterBars(state);
   const footer = document.createElement('footer');
+  const gameOverDialog = createGameOverDialog(state, handlers.onPlayAgain);
+  const pauseDialog = createPauseDialog(state, handlers.onResume, handlers.onExitToMenu);
 
   shell.className = 'game-shell';
+  shell.inert = state.status === 'paused';
+
+  if (state.status === 'paused') {
+    shell.classList.add('game-shell--paused');
+  }
   board.className = 'game-board';
   footer.className = 'game-footer';
   footer.textContent = 'Choose ingredients carefully. Every portion is spent.';
 
   board.append(shelf, cauldron, recipe);
-  shell.append(createHeader(state), board, parameterBars, footer);
-  container.replaceChildren(shell);
+  shell.append(createHeader(state, handlers.onPause), board, parameterBars, footer);
+  container.replaceChildren(
+    shell,
+    ...(pauseDialog ? [pauseDialog] : []),
+    ...(gameOverDialog ? [gameOverDialog] : []),
+  );
 };
