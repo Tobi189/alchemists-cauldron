@@ -384,6 +384,21 @@ button {
     filter: saturate(0.45);
     opacity: 0.62;
   }
+
+  &[draggable='true'] {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+}
+
+.ingredient-card--dragging {
+  border-color: $magic;
+  filter: brightness(1.2);
+  opacity: 0.48;
+  transform: scale(0.98);
 }
 
 .ingredient-card--empty {
@@ -544,6 +559,41 @@ button {
     content: '';
     background: rgba(#000, 0.82);
     filter: blur(0.8rem);
+  }
+}
+
+.cauldron-stage--drop-target {
+  &::before {
+    border-color: rgba($magic, 0.9);
+    background:
+      radial-gradient(
+        circle,
+        rgba($magic, 0.12) 0 41%,
+        rgba($magic, 0.65) 42% 44%,
+        transparent 45%
+      ),
+      repeating-conic-gradient(from 22deg, rgba($gold-light, 0.65) 0 2deg, transparent 2deg 30deg);
+    filter: drop-shadow(0 0 1rem rgba($magic, 0.8));
+  }
+
+  .cauldron-stage__glow {
+    background: radial-gradient(
+      circle,
+      rgba(#e8ff9c, 0.58),
+      rgba($magic, 0.3) 42%,
+      transparent 72%
+    );
+    filter: blur(0.45rem);
+  }
+
+  .cauldron__rim {
+    border-color: $magic;
+    box-shadow:
+      inset 0 0.35rem 0.45rem rgba(#fff, 0.18),
+      inset 0 -0.45rem 0.65rem rgba(#000, 0.85),
+      0 0 0 2px $gold-light,
+      0 0 0 5px rgba(#030503, 0.75),
+      0 0 2.8rem rgba($magic, 0.9);
   }
 }
 
