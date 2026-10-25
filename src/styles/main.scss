@@ -885,6 +885,14 @@ button {
   place-items: center;
 }
 
+.game-controls__start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  justify-content: center;
+}
+
 .game-controls__side-action {
   min-width: min(10rem, 100%);
 }
