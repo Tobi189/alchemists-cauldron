@@ -83,7 +83,7 @@ const createTimerHud = (state: GameState): HTMLElement => {
   const rules = getDifficultySettings(state.difficulty);
   const progressPercentage = (state.timeLeft / rules.startingTimeSeconds) * 100;
 
-  timer.className = 'hud__timer';
+  timer.className = 'hud__plaque hud__timer';
   progress.className = 'hud__timer-progress';
   fill.className = 'hud__timer-fill';
   progress.setAttribute('role', 'progressbar');
@@ -113,27 +113,32 @@ const createHeader = (state: GameState): HTMLElement => {
   const time = createTimerHud(state);
 
   const lives = document.createElement('div');
+  const livesLabel = document.createElement('span');
 
   header.className = 'game-header';
   frame.className = 'game-header__frame';
   hud.className = 'game-header__hud';
-  score.classList.add('hud__score');
+  score.classList.add('hud__plaque', 'hud__score');
   titleGroup.className = 'game-header__title-group';
   title.className = 'game-header__title';
   title.textContent = "Alchemist's Cauldron";
+  livesLabel.textContent = 'Lives';
   titleGroup.append(title);
 
   if (state.status === 'menu') {
-    lives.className = 'hud__lives hud__lives--empty';
-    lives.setAttribute('aria-hidden', 'true');
+    const dormantValue = document.createElement('strong');
+
+    lives.className = 'hud__plaque hud__lives hud__lives--empty';
+    livesLabel.className = 'hud__label';
+    dormantValue.className = 'hud__value hud__value--dormant';
+    dormantValue.textContent = '—';
+    lives.append(livesLabel, dormantValue);
   } else {
-    const livesLabel = document.createElement('span');
     const hearts = document.createElement('span');
 
-    lives.className = 'hud__lives';
+    lives.className = 'hud__plaque hud__lives';
     livesLabel.className = 'visually-hidden';
     hearts.className = 'hud__hearts';
-    livesLabel.textContent = 'Lives';
     hearts.setAttribute('aria-label', `${state.lives} lives remaining`);
 
     for (let life = 0; life < state.lives; life += 1) {
