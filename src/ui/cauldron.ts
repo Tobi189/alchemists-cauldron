@@ -1,7 +1,9 @@
 import cauldronEmblemUrl from '../assets/ui/cauldron-emblem.svg';
 import cauldronFiligreeUrl from '../assets/ui/cauldron-filigree.svg';
+import { getDifficultySettings } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
 import type { GameState } from '../types/game.ts';
+import { getDraggedIngredientId, isIngredientDrag } from './drag-and-drop.ts';
 
 const createCauldronContents = (state: GameState): HTMLElement => {
   const contents = document.createElement('div');
@@ -43,7 +45,10 @@ const createCauldronContents = (state: GameState): HTMLElement => {
   return contents;
 };
 
-export const createCauldron = (state: GameState): HTMLElement => {
+export const createCauldron = (
+  state: GameState,
+  onAddIngredient: (ingredientId: string) => void,
+): HTMLElement => {
   const section = document.createElement('section');
   const stage = document.createElement('div');
   const glow = document.createElement('div');
@@ -54,9 +59,17 @@ export const createCauldron = (state: GameState): HTMLElement => {
   const filigree = document.createElement('img');
   const emblem = document.createElement('img');
   const base = document.createElement('div');
+  const rules = getDifficultySettings(state.difficulty);
+  const canAcceptDrop =
+    state.status === 'playing' && state.cauldronIngredientIds.length < rules.cauldronCapacity;
+
+  const removeDropHighlight = (): void => {
+    stage.classList.remove('cauldron-stage--drop-target');
+  };
 
   section.className = 'cauldron-area';
   stage.className = 'cauldron-stage';
+  stage.setAttribute('aria-label', 'Cauldron drop zone');
   glow.className = 'cauldron-stage__glow';
   vessel.className = 'cauldron';
   rim.className = 'cauldron__rim';
@@ -71,6 +84,42 @@ export const createCauldron = (state: GameState): HTMLElement => {
   emblem.src = cauldronEmblemUrl;
   emblem.alt = '';
   emblem.setAttribute('aria-hidden', 'true');
+
+  stage.addEventListener('dragover', (event) => {
+    if (!canAcceptDrop || !isIngredientDrag(event)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'copy';
+    }
+
+    stage.classList.add('cauldron-stage--drop-target');
+  });
+  stage.addEventListener('dragleave', (event) => {
+    const nextTarget = event.relatedTarget;
+
+    if (!(nextTarget instanceof Node) || !stage.contains(nextTarget)) {
+      removeDropHighlight();
+    }
+  });
+  stage.addEventListener('drop', (event) => {
+    removeDropHighlight();
+
+    if (!canAcceptDrop || !isIngredientDrag(event)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const ingredientId = getDraggedIngredientId(event);
+
+    if (ingredientId) {
+      onAddIngredient(ingredientId);
+    }
+  });
 
   liquid.append(createCauldronContents(state));
   rim.append(liquid);

@@ -1,6 +1,7 @@
 import { getDifficultySettings } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
 import type { GameState, Ingredient } from '../types/game.ts';
+import { didStartIngredientDrag } from './drag-and-drop.ts';
 
 const formatModifier = (value: number): string =>
   value > 0 ? `+${value}` : String(value).replace('-', '−');
@@ -63,6 +64,7 @@ const createIngredientCard = (
   card.className = 'ingredient-card';
   card.type = 'button';
   card.disabled = isShelfBlocked;
+  card.draggable = !isShelfBlocked;
   card.setAttribute('aria-label', `Add ${ingredient.name}. ${stock} portions remaining.`);
   icon.className = 'ingredient-card__icon';
   content.className = 'ingredient-card__content';
@@ -72,9 +74,11 @@ const createIngredientCard = (
   sigil.className = 'ingredient-card__sigil';
   badge.className = 'ingredient-card__stock';
   icon.src = ingredient.iconUrl;
+  icon.draggable = false;
   icon.alt = '';
   icon.setAttribute('aria-hidden', 'true');
   sigil.src = ingredient.sigilUrl;
+  sigil.draggable = false;
   sigil.alt = '';
   sigil.setAttribute('aria-hidden', 'true');
   name.textContent = ingredient.name;
@@ -89,6 +93,17 @@ const createIngredientCard = (
   card.append(icon, content, side);
   card.addEventListener('click', () => {
     onAddIngredient(ingredient.id);
+  });
+  card.addEventListener('dragstart', (event) => {
+    if (card.disabled || !didStartIngredientDrag(event, ingredient.id)) {
+      event.preventDefault();
+      return;
+    }
+
+    card.classList.add('ingredient-card--dragging');
+  });
+  card.addEventListener('dragend', () => {
+    card.classList.remove('ingredient-card--dragging');
   });
 
   return card;
