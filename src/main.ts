@@ -5,6 +5,7 @@ import { brewPotion } from './logic/brew-check.ts';
 import { finishGameIfNeeded } from './logic/game-over.ts';
 import { addLeaderboardEntry, isTopTenScore } from './logic/leaderboard.ts';
 import { pauseGame, resumeGame } from './logic/pause.ts';
+import { pourOutCauldron } from './logic/pour-out.ts';
 import { syncTimer } from './logic/timer.ts';
 import { createMenuState, createNewGameState } from './state/game-state.ts';
 import { didClearLeaderboard, didSaveLeaderboard, loadLeaderboard } from './storage/leaderboard.ts';
@@ -225,6 +226,17 @@ const startApp = (container: HTMLElement): void => {
       },
       onBrew: () => {
         const nextState = finishGameIfNeeded(brewPotion(gameState));
+
+        if (nextState === gameState) {
+          return;
+        }
+
+        gameState = nextState;
+        persistCurrentGame();
+        render();
+      },
+      onPourOut: () => {
+        const nextState = finishGameIfNeeded(pourOutCauldron(gameState));
 
         if (nextState === gameState) {
           return;

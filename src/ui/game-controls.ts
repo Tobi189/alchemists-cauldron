@@ -57,6 +57,7 @@ export const createGameControls = (
   onContinueGame: () => void,
   hasSavedGame: boolean,
   onBrew: () => void,
+  onPourOut: () => void,
   onOpenLeaderboard: () => void,
   onOpenHelp: () => void,
   onOpenSettings: () => void,
@@ -96,9 +97,19 @@ export const createGameControls = (
       createActionButton('Settings', 'secondary-action game-controls__side-action', onOpenSettings),
     );
   } else {
+    const playActions = document.createElement('div');
     const brewButton = createActionButton('Brew', 'primary-action', onBrew);
+    const pourOutButton = createActionButton(
+      'Pour Out −10s',
+      'secondary-action game-controls__pour-out',
+      onPourOut,
+    );
+
+    playActions.className = 'game-controls__play-actions';
     brewButton.disabled = state.cauldronIngredientIds.length === 0 || state.status !== 'playing';
-    centerSlot.append(brewButton, createBrewStatus(state));
+    pourOutButton.disabled = state.cauldronIngredientIds.length === 0 || state.status !== 'playing';
+    playActions.append(brewButton, pourOutButton);
+    centerSlot.append(playActions, createBrewStatus(state));
 
     if (state.status === 'playing') {
       rightSlot.append(

@@ -45,6 +45,7 @@ export interface AppHandlers {
   readonly onExitToMenu: () => void;
   readonly onAddIngredient: (ingredientId: string) => void;
   readonly onBrew: () => void;
+  readonly onPourOut: () => void;
 }
 
 const formatTime = (totalSeconds: number): string => {
@@ -171,6 +172,7 @@ export const renderApp = (
     handlers.onContinueGame,
     handlers.hasSavedGame,
     handlers.onBrew,
+    handlers.onPourOut,
     handlers.onOpenLeaderboard,
     handlers.onOpenHelp,
     handlers.onOpenSettings,

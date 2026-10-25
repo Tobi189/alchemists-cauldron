@@ -1072,6 +1072,24 @@ button {
   justify-content: center;
 }
 
+.game-controls__play-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-controls__play-actions .primary-action {
+  min-width: min(13rem, 80vw);
+}
+
+.game-controls__pour-out {
+  border-color: rgba(#ff9f71, 0.8);
+  color: #ffd8bc;
+  background: linear-gradient(180deg, rgba(#5e2e1d, 0.96), rgba(#22110c, 0.98));
+}
+
 .game-controls__side-action {
   min-width: min(10rem, 100%);
 }

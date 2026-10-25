@@ -1,4 +1,5 @@
 import { getDifficultySettings } from '../data/difficulty.ts';
+import { clearCauldron } from './clear-cauldron.ts';
 import { isValueInRange } from './range.ts';
 import { calculateReactedCauldronValues } from './reactions.ts';
 import { selectRandomRecipe } from './recipe-generator.ts';
@@ -46,13 +47,10 @@ export const brewPotion = (
     state.enabledReactionIds,
   );
   const isSuccess = isSuccessfulBrew(values, state.activeRecipe, rules.recipeTolerance);
-  const clearedState = {
+  const clearedState = clearCauldron({
     ...state,
     timeLeft,
-    previousCauldronIngredientIds: state.cauldronIngredientIds,
-    cauldronIngredientIds: [],
-    lastReactionIds: [],
-  };
+  });
 
   if (isSuccess) {
     const nextTimeLeft = Math.min(timeLeft + rules.timeBonusSeconds, rules.startingTimeSeconds);
