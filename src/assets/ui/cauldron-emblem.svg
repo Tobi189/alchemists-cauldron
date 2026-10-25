@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs><radialGradient id="disc"><stop stop-color="#27451a"/><stop offset=".7" stop-color="#0b130c"/><stop offset="1" stop-color="#030604"/></radialGradient><filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <circle cx="60" cy="60" r="54" fill="url(#disc)" stroke="#b9913d" stroke-width="3"/>
+  <circle cx="60" cy="60" r="45" fill="none" stroke="#73c72d" stroke-width="2" filter="url(#glow)"/>
+  <path d="m60 20 35 64H25Z" fill="none" stroke="#a7ee4f" stroke-linejoin="round" stroke-width="5" filter="url(#glow)"/>
+  <circle cx="60" cy="66" r="17" fill="none" stroke="#8fd83e" stroke-width="3"/>
+  <path d="M60 20v29M25 84l25-14M95 84 70 70" fill="none" stroke="#d5ee88" stroke-linecap="round" stroke-width="2" opacity=".8"/>
+  <circle cx="60" cy="66" r="4" fill="#e1ff91"/>
+</svg>

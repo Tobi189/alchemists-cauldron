@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 300" preserveAspectRatio="xMidYMid meet">
+  <defs><linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5c461f"/><stop offset=".32" stop-color="#d0ac58"/><stop offset=".6" stop-color="#6b4c20"/><stop offset="1" stop-color="#b68e41"/></linearGradient></defs>
+  <g fill="none" stroke="url(#metal)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M210 28c-31 19-49 41-54 68-31-22-61-27-92-14 32 6 54 22 67 48-32-4-61 8-88 36 37-13 69-8 94 16-27 14-44 38-51 72 24-27 51-39 81-35" stroke-width="7"/>
+    <path d="M210 28c31 19 49 41 54 68 31-22 61-27 92-14-32 6-54 22-67 48 32-4 61 8 88 36-37-13-69-8-94 16 27 14 44 38 51 72-24-27-51-39-81-35" stroke-width="7"/>
+    <path d="M153 109c17 3 31 13 42 29M267 109c-17 3-31 13-42 29M127 179c20 1 35 8 45 21M293 179c-20 1-35 8-45 21" stroke-width="4" opacity=".75"/>
+    <circle cx="210" cy="145" r="76" stroke-width="5" opacity=".62"/>
+  </g>
+  <g fill="#b89447" stroke="#33230f" stroke-width="2"><circle cx="70" cy="84" r="7"/><circle cx="350" cy="84" r="7"/><circle cx="89" cy="250" r="7"/><circle cx="331" cy="250" r="7"/></g>
+</svg>
