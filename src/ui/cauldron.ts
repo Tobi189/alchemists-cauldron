@@ -2,7 +2,7 @@ import cauldronEmblemUrl from '../assets/ui/cauldron-emblem.svg';
 import ornateCauldronUrl from '../assets/ui/ornate-cauldron.webp';
 import { getDifficultySettings } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
-import type { GameState } from '../types/game.ts';
+import type { BrewResult, GameState } from '../types/game.ts';
 import { getDraggedIngredientId, isIngredientDrag } from './drag-and-drop.ts';
 
 const createCauldronContents = (state: GameState): HTMLElement => {
@@ -48,6 +48,7 @@ const createCauldronContents = (state: GameState): HTMLElement => {
 export const createCauldron = (
   state: GameState,
   onAddIngredient: (ingredientId: string) => void,
+  brewVisualFeedback: BrewResult | undefined,
 ): HTMLElement => {
   const section = document.createElement('section');
   const stage = document.createElement('div');
@@ -58,6 +59,7 @@ export const createCauldron = (
   const liquid = document.createElement('div');
   const body = document.createElement('div');
   const emblem = document.createElement('img');
+  const feedback = document.createElement('div');
   const rules = getDifficultySettings(state.difficulty);
   const canAcceptDrop =
     state.status === 'playing' && state.cauldronIngredientIds.length < rules.cauldronCapacity;
@@ -76,6 +78,7 @@ export const createCauldron = (
   liquid.className = 'cauldron__liquid';
   body.className = 'cauldron__body';
   emblem.className = 'cauldron__emblem';
+  feedback.className = 'cauldron-feedback';
   artwork.src = ornateCauldronUrl;
   artwork.alt = '';
   artwork.draggable = false;
@@ -83,6 +86,19 @@ export const createCauldron = (
   emblem.src = cauldronEmblemUrl;
   emblem.alt = '';
   emblem.setAttribute('aria-hidden', 'true');
+  feedback.setAttribute('aria-hidden', 'true');
+
+  if (brewVisualFeedback) {
+    stage.classList.add(`cauldron-stage--brew-${brewVisualFeedback}`);
+    feedback.classList.add(`cauldron-feedback--${brewVisualFeedback}`);
+
+    for (let particleIndex = 0; particleIndex < 8; particleIndex += 1) {
+      const particle = document.createElement('span');
+      particle.className = 'cauldron-feedback__particle';
+      particle.style.setProperty('--particle-angle', `${particleIndex * 45}deg`);
+      feedback.append(particle);
+    }
+  }
 
   stage.addEventListener('dragover', (event) => {
     if (!canAcceptDrop || !isIngredientDrag(event)) {
@@ -124,7 +140,7 @@ export const createCauldron = (
   rim.append(liquid);
   body.append(emblem);
   vessel.append(artwork, rim, body);
-  stage.append(glow, vessel);
+  stage.append(glow, vessel, feedback);
 
   section.append(stage);
 

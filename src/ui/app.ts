@@ -2,7 +2,7 @@ import clockIconUrl from '../assets/ui/clock.svg';
 import heartIconUrl from '../assets/ui/heart.svg';
 import scoreIconUrl from '../assets/ui/score-emblem.svg';
 import { getDifficultySettings } from '../data/difficulty.ts';
-import type { Difficulty, GameState } from '../types/game.ts';
+import type { BrewResult, Difficulty, GameState } from '../types/game.ts';
 import type { LeaderboardEntry } from '../types/leaderboard.ts';
 import { createCauldron } from './cauldron.ts';
 import {
@@ -24,6 +24,7 @@ export interface AppHandlers {
   readonly leaderboardDialog: 'closed' | 'open' | 'confirm-clear';
   readonly menuDialog: 'closed' | 'help' | 'settings';
   readonly leaderboardNotice: string | undefined;
+  readonly brewVisualFeedback: BrewResult | undefined;
   readonly shouldRequestPlayerName: boolean;
   readonly hasSavedGame: boolean;
   readonly onStartGame: () => void;
@@ -168,7 +169,7 @@ export const renderApp = (
   const shell = document.createElement('main');
   const board = document.createElement('div');
   const shelf = createShelf(state, handlers.onAddIngredient);
-  const cauldron = createCauldron(state, handlers.onAddIngredient);
+  const cauldron = createCauldron(state, handlers.onAddIngredient, handlers.brewVisualFeedback);
   const recipe = createRecipePanel(state);
   const parameterBars = createParameterBars(state);
   const gameControls = createGameControls(
@@ -234,6 +235,10 @@ export const renderApp = (
 
   if (state.status === 'paused') {
     shell.classList.add('game-shell--paused');
+  }
+
+  if (handlers.brewVisualFeedback) {
+    shell.classList.add(`game-shell--brew-${handlers.brewVisualFeedback}`);
   }
   board.className = 'game-board';
   footer.className = 'game-footer';

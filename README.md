@@ -19,8 +19,8 @@ target ranges before time, lives or ingredient stock runs out.
 
 ## Current implementation
 
-The project currently implements the complete technical foundation, Level 1 and Level 2 requirements
-for a total proposed score of **278 points**.
+The project implements the complete technical foundation and all three gameplay levels for a total
+proposed score of **393 points**.
 
 Implemented:
 
@@ -38,11 +38,13 @@ Implemented:
 - [x] Difficulty-specific shelves, recipes, limits, scoring and bonuses
 - [x] Separate Top-10 leaderboard for each difficulty
 - [x] Validated auto-save and Continue Game
+- [x] Drag-and-drop ingredient controls with click and keyboard alternatives
+- [x] Hard-mode ingredient tooltips with edge-aware positioning
+- [x] Complete difficulty-aware chemical reaction system
+- [x] Pour Out action with its 10-second cost
+- [x] Active-game keyboard shortcuts
+- [x] CSS success, explosion, shake, floating-ingredient and parameter animations
 - [x] GitHub Pages deployment
-
-Planned:
-
-- [ ] Level 3 — advanced controls, reactions and visual feedback
 
 ## Game overview
 
@@ -68,12 +70,12 @@ opens in the paused state. Finished, abandoned and malformed saves are not offer
 
 ## Project levels
 
-| Level        | Functionality                                                       | Total score | Status      |
-| ------------ | ------------------------------------------------------------------- | ----------: | ----------- |
-| Precondition | Repository, tooling and project structure                           |          58 | Complete    |
-| Level 1      | Basic Medium-difficulty game                                        |         228 | Complete    |
-| Level 2      | Difficulty selection, auto-save and Continue Game                   |         278 | Complete    |
-| Level 3      | Drag and drop, reactions, tooltips, Pour Out, shortcuts and effects |         393 | In progress |
+| Level        | Functionality                                                       | Total score | Status   |
+| ------------ | ------------------------------------------------------------------- | ----------: | -------- |
+| Precondition | Repository, tooling and project structure                           |          58 | Complete |
+| Level 1      | Basic Medium-difficulty game                                        |         228 | Complete |
+| Level 2      | Difficulty selection, auto-save and Continue Game                   |         278 | Complete |
+| Level 3      | Drag and drop, reactions, tooltips, Pour Out, shortcuts and effects |         393 | Complete |
 
 ## Technology
 
@@ -187,7 +189,7 @@ Development uses cumulative story branches:
 
 - `story-1` is based on `main`.
 - `story-2` is based on `story-1`.
-- `story-3` will be based on `story-2`.
+- `story-3` is based on `story-2`.
 - Small task branches are merged into the current story branch.
 - Final story pull requests target the preceding story branch and remain unmerged for Cross-Check.
 

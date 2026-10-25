@@ -917,6 +917,17 @@ button {
   box-shadow:
     inset 0 0 0.5rem rgba(#fff, 0.18),
     0 0 0.8rem rgba(#f0ff9d, 0.52);
+  animation: cauldron-ingredient-float 2.4s ease-in-out infinite;
+
+  &:nth-child(2n) {
+    animation-delay: -0.8s;
+    animation-duration: 2.8s;
+  }
+
+  &:nth-child(3n) {
+    animation-delay: -1.6s;
+    animation-duration: 2.15s;
+  }
 }
 
 .cauldron__ingredient-position {
@@ -939,6 +950,346 @@ button {
   width: 82%;
   aspect-ratio: 1;
   object-fit: contain;
+}
+
+.cauldron-feedback {
+  position: absolute;
+  z-index: 8;
+  top: 22%;
+  left: 50%;
+  width: clamp(8rem, 18vw, 13rem);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cauldron-feedback::before,
+.cauldron-feedback::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  content: '';
+  opacity: 0;
+}
+
+.cauldron-feedback--success::before {
+  border: 0.35rem solid rgba(#dfff87, 0.92);
+  box-shadow:
+    inset 0 0 1.5rem rgba($magic, 0.68),
+    0 0 2.4rem rgba($magic, 0.88);
+  animation: brew-success-ring 850ms cubic-bezier(0.16, 0.75, 0.28, 1) both;
+}
+
+.cauldron-feedback--success::after {
+  background: radial-gradient(circle, rgba(#efffb0, 0.95), rgba($magic, 0.42) 28%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: brew-success-flash 780ms ease-out both;
+}
+
+.cauldron-feedback--failure {
+  top: 31%;
+}
+
+.cauldron-feedback--failure::before {
+  background:
+    radial-gradient(circle, #fff2aa 0 8%, #ff9b38 16%, #e53d22 36%, transparent 68%),
+    conic-gradient(
+      from 12deg,
+      transparent 0 7%,
+      rgba(#ffb43f, 0.95) 8% 11%,
+      transparent 12% 24%,
+      rgba(#ff5f32, 0.92) 25% 29%,
+      transparent 30% 47%,
+      rgba(#ffd66e, 0.9) 48% 51%,
+      transparent 52% 100%
+    );
+  clip-path: polygon(
+    50% 0,
+    61% 31%,
+    87% 13%,
+    73% 41%,
+    100% 50%,
+    70% 59%,
+    89% 88%,
+    61% 70%,
+    50% 100%,
+    39% 70%,
+    12% 88%,
+    30% 59%,
+    0 50%,
+    29% 41%,
+    13% 13%,
+    39% 31%
+  );
+  filter: drop-shadow(0 0 1.5rem rgba(#ff4b24, 0.92));
+  animation: brew-explosion 720ms cubic-bezier(0.12, 0.72, 0.24, 1) both;
+}
+
+.cauldron-feedback--failure::after {
+  inset: 14%;
+  border: 0.3rem solid rgba(#ffbd5c, 0.86);
+  box-shadow: 0 0 1.3rem rgba(#ff572d, 0.7);
+  animation: brew-explosion-wave 760ms ease-out both;
+}
+
+.cauldron-feedback__particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.45rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(#f4ffba, $magic);
+  box-shadow: 0 0 0.65rem rgba($magic, 0.9);
+  opacity: 0;
+  animation: brew-particle-burst 820ms ease-out both;
+}
+
+.cauldron-feedback--failure .cauldron-feedback__particle {
+  background: linear-gradient(#fff3ad, #ff5a2d);
+  box-shadow: 0 0 0.7rem rgba(#ff4b24, 0.95);
+  animation-name: brew-failure-particle-burst;
+}
+
+.cauldron-stage--brew-success {
+  .cauldron__artwork {
+    animation: cauldron-success-lift 850ms ease-out both;
+  }
+
+  .cauldron__liquid {
+    animation: cauldron-success-liquid 820ms ease-out both;
+  }
+
+  .cauldron__emblem {
+    animation: cauldron-success-emblem 850ms ease-out both;
+  }
+}
+
+.cauldron-stage--brew-failure {
+  .cauldron__artwork,
+  .cauldron__rim {
+    animation: cauldron-failure-impact 620ms ease-out both;
+  }
+
+  .cauldron__liquid {
+    animation: cauldron-failure-liquid 620ms ease-out both;
+  }
+}
+
+.game-shell--brew-failure {
+  animation: brew-screen-shake 560ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes cauldron-ingredient-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+
+  50% {
+    transform: translateY(-0.55rem) rotate(3deg);
+  }
+}
+
+@keyframes brew-success-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+
+  28% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+@keyframes brew-success-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+
+  35% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes brew-particle-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--particle-angle)) translateY(0) scale(0.4);
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--particle-angle)) translateY(-6.5rem) scale(0);
+  }
+}
+
+@keyframes brew-failure-particle-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--particle-angle)) translateY(0) scale(0.5);
+  }
+
+  18% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--particle-angle)) translateY(-8rem) scale(0.15);
+  }
+}
+
+@keyframes brew-explosion {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-12deg);
+  }
+
+  24% {
+    opacity: 1;
+    transform: scale(1.08) rotate(4deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.55) rotate(10deg);
+  }
+}
+
+@keyframes brew-explosion-wave {
+  0% {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+@keyframes cauldron-success-lift {
+  0%,
+  100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 1.5rem 1.1rem rgba(#000, 0.9));
+  }
+
+  38% {
+    transform: translateY(-0.55rem) scale(1.015);
+    filter: drop-shadow(0 1.5rem 1.1rem rgba(#000, 0.9)) drop-shadow(0 0 1.6rem rgba($magic, 0.72))
+      brightness(1.15);
+  }
+}
+
+@keyframes cauldron-success-liquid {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+
+  36% {
+    filter: brightness(1.85) saturate(1.35);
+  }
+}
+
+@keyframes cauldron-success-emblem {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  42% {
+    transform: translate(-50%, -50%) scale(1.18) rotate(8deg);
+  }
+}
+
+@keyframes cauldron-failure-impact {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+
+  24% {
+    transform: translate(-0.45rem, 0.15rem) rotate(-1.2deg);
+  }
+
+  48% {
+    transform: translate(0.5rem, -0.12rem) rotate(1.1deg);
+  }
+
+  72% {
+    transform: translate(-0.25rem, 0.08rem) rotate(-0.5deg);
+  }
+}
+
+@keyframes cauldron-failure-liquid {
+  0%,
+  100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+
+  35% {
+    filter: hue-rotate(285deg) brightness(1.55) saturate(1.5);
+  }
+}
+
+@keyframes brew-screen-shake {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+
+  15%,
+  45%,
+  75% {
+    transform: translate(-0.38rem, 0.12rem);
+  }
+
+  30%,
+  60%,
+  90% {
+    transform: translate(0.38rem, -0.1rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-shell--brew-failure,
+  .cauldron-stage--brew-success .cauldron__artwork,
+  .cauldron-stage--brew-success .cauldron__liquid,
+  .cauldron-stage--brew-success .cauldron__emblem,
+  .cauldron-stage--brew-failure .cauldron__artwork,
+  .cauldron-stage--brew-failure .cauldron__rim,
+  .cauldron-stage--brew-failure .cauldron__liquid,
+  .cauldron-feedback::before,
+  .cauldron-feedback::after,
+  .cauldron-feedback__particle {
+    animation-duration: 1ms;
+  }
+
+  .cauldron__ingredient {
+    animation: none;
+  }
 }
 
 .primary-action {
