@@ -268,7 +268,6 @@ button {
 .recipe-panel {
   position: relative;
   min-width: 0;
-  overflow: hidden;
   border: 1px solid rgba($gold, 0.65);
   box-shadow:
     inset 0 0 0 3px rgba(#000, 0.55),
@@ -276,18 +275,63 @@ button {
 }
 
 .ingredient-shelf {
-  padding: 0.75rem;
-  border-radius: 0.35rem 0.35rem 0.8rem 0.8rem;
+  padding: 1.45rem 0.85rem 0.9rem;
+  margin-top: 0.7rem;
+  border: 2px solid #69451d;
+  border-radius: 0.25rem 0.25rem 0.7rem 0.7rem;
   background:
-    linear-gradient(90deg, rgba(#2a1709, 0.75), transparent 12% 88%, rgba(#2a1709, 0.75)),
-    repeating-linear-gradient(0deg, #17130d 0 4.6rem, #2c1b0c 4.6rem 4.85rem);
+    linear-gradient(90deg, rgba(#080503, 0.8), transparent 10% 90%, rgba(#080503, 0.8)),
+    repeating-linear-gradient(90deg, rgba(#fff, 0.015) 0 2px, transparent 2px 1.5rem),
+    linear-gradient(100deg, #211207, #3a210d 38%, #1b0f07 72%, #321b0a);
+  box-shadow:
+    inset 0 0 0 3px #100904,
+    inset 0 0 0 5px rgba($gold, 0.16),
+    inset 0 0 2rem rgba(#000, 0.65),
+    0 0.75rem 1.7rem rgba(#000, 0.55);
+
+  &::before {
+    position: absolute;
+    z-index: 0;
+    inset: 0.42rem;
+    border: 1px solid rgba($gold-light, 0.28);
+    content: '';
+    pointer-events: none;
+  }
+
+  &::after {
+    position: absolute;
+    z-index: 0;
+    top: 0.32rem;
+    bottom: 0.32rem;
+    left: 0.45rem;
+    width: calc(100% - 0.9rem);
+    border-inline: 0.38rem solid rgba(#120903, 0.8);
+    content: '';
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.recipe-panel {
+  overflow: hidden;
 }
 
 .panel-heading {
-  margin: 0 0 0.75rem;
-  padding: 0.55rem;
-  border: 1px solid rgba($gold, 0.72);
-  background: linear-gradient(#241a0d, #100d08);
+  width: 82%;
+  padding: 0.62rem 1.5rem;
+  margin: -2.25rem auto 0.9rem;
+  border: 1px solid rgba($gold-light, 0.78);
+  background:
+    linear-gradient(90deg, transparent, rgba($gold, 0.08) 18% 82%, transparent),
+    linear-gradient(#2e1b0b, #100a05);
+  box-shadow:
+    inset 0 0 0 3px rgba(#000, 0.48),
+    0 0.45rem 0.75rem rgba(#000, 0.6);
+  clip-path: polygon(7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%, 0 50%);
   color: $gold-light;
   font-size: clamp(1rem, 1.6vw, 1.3rem);
   font-weight: 500;
@@ -298,25 +342,30 @@ button {
 
 .ingredient-shelf__list {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.55rem;
 }
 
 .ingredient-card {
   display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr) 2.15rem;
-  gap: 0.55rem;
+  grid-template-columns: clamp(4rem, 5.5vw, 5.25rem) minmax(0, 1fr) clamp(2.5rem, 3.5vw, 3.25rem);
+  gap: clamp(0.45rem, 0.9vw, 0.75rem);
   align-items: center;
   width: 100%;
-  min-height: 4.35rem;
-  padding: 0.45rem;
-  border: 1px solid rgba($gold, 0.36);
-  border-radius: 0.35rem;
+  min-height: clamp(5rem, 5.5vw, 6rem);
+  padding: 0.35rem 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba($gold, 0.46);
+  border-radius: 0.18rem;
   color: $ink;
   text-align: left;
   cursor: pointer;
   background:
-    radial-gradient(circle at 15% 50%, rgba($magic, 0.08), transparent 35%),
-    linear-gradient(90deg, rgba(#080a08, 0.96), rgba(#17150f, 0.96));
+    linear-gradient(90deg, rgba(#000, 0.32), transparent 18% 82%, rgba(#000, 0.34)),
+    repeating-linear-gradient(0deg, transparent 0 1.9rem, rgba($gold, 0.05) 1.9rem 2rem),
+    linear-gradient(100deg, #100b07, #25170b 48%, #120c07);
+  box-shadow:
+    inset 0 0 0 2px rgba(#000, 0.48),
+    inset 0 -0.65rem 1rem rgba(#000, 0.28);
   transition:
     border-color 160ms ease,
     filter 160ms ease,
@@ -340,7 +389,11 @@ button {
 .ingredient-card--empty {
   cursor: not-allowed;
   opacity: 0.38;
-  grid-template-columns: minmax(0, 1fr) 2.15rem;
+  grid-template-columns: minmax(0, 1fr) clamp(2.5rem, 3.5vw, 3.25rem);
+
+  .ingredient-card__side {
+    align-content: center;
+  }
 }
 
 .ingredient-card__empty-message {
@@ -354,18 +407,12 @@ button {
 }
 
 .ingredient-card__icon {
-  display: grid;
-  width: 2.85rem;
+  display: block;
+  width: 100%;
+  max-width: 5rem;
   aspect-ratio: 1;
-  place-items: center;
-  border: 1px solid rgba($magic, 0.48);
-  border-radius: 50% 50% 45% 45%;
-  color: $magic;
-  font-size: 1.65rem;
-  background: radial-gradient(circle, rgba($magic, 0.24), rgba(#07100a, 0.9) 70%);
-  box-shadow:
-    inset 0 0 0.75rem rgba($magic, 0.13),
-    0 0 0.65rem rgba($magic, 0.12);
+  object-fit: contain;
+  filter: drop-shadow(0 0.35rem 0.35rem rgba(#000, 0.75));
 }
 
 .ingredient-card__content {
@@ -376,10 +423,14 @@ button {
 
 .ingredient-card__name {
   overflow: hidden;
-  font-size: clamp(0.78rem, 1.1vw, 1rem);
-  letter-spacing: 0.025em;
+  color: #f5e8c7;
+  font-size: clamp(0.82rem, 1.2vw, 1.08rem);
+  font-weight: 600;
+  letter-spacing: 0.045em;
   text-overflow: ellipsis;
+  text-transform: uppercase;
   white-space: nowrap;
+  text-shadow: 0 2px #000;
 }
 
 .ingredient-card__stats {
@@ -394,10 +445,27 @@ button {
   border-radius: 0.2rem;
   font-size: clamp(0.63rem, 0.85vw, 0.75rem);
   font-variant-numeric: tabular-nums;
+  background: rgba(#020302, 0.62);
 
   abbr {
     text-decoration: none;
   }
+}
+
+.ingredient-card__side {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
+  align-self: stretch;
+  align-content: space-between;
+}
+
+.ingredient-card__sigil {
+  width: clamp(1.8rem, 3vw, 2.65rem);
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: sepia(0.25) drop-shadow(0 0.15rem 0.2rem rgba(#000, 0.75));
+  opacity: 0.68;
 }
 
 .ingredient-card__stat--temperature {
@@ -417,13 +485,15 @@ button {
   width: 2rem;
   aspect-ratio: 1;
   place-items: center;
-  border: 1px solid $magic;
+  border: 1px solid $gold-light;
   border-radius: 50%;
-  color: $magic;
+  color: #c8f16b;
   font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
-  background: #0a1108;
-  box-shadow: 0 0 0.5rem rgba($magic, 0.25);
+  background: radial-gradient(circle, #17220d, #080b06 72%);
+  box-shadow:
+    inset 0 0 0 2px rgba(#000, 0.65),
+    0 0 0.5rem rgba($magic, 0.25);
 }
 
 .ingredient-shelf__notice {
@@ -591,7 +661,10 @@ button {
 }
 
 .cauldron__ingredient-icon {
-  font-size: clamp(1.1rem, 2.8vw, 1.8rem);
+  display: block;
+  width: 82%;
+  aspect-ratio: 1;
+  object-fit: contain;
 }
 
 .primary-action {
@@ -1265,16 +1338,15 @@ button {
   }
 
   .ingredient-card {
-    grid-template-columns: 2.5rem minmax(0, 1fr) 1.8rem;
+    grid-template-columns: 4rem minmax(0, 1fr) 2.7rem;
   }
 
   .ingredient-card__icon {
-    width: 2.4rem;
-    font-size: 1.3rem;
+    width: 100%;
   }
 
   .ingredient-card__stock {
-    width: 1.7rem;
+    width: 1.85rem;
     font-size: 0.8rem;
   }
 

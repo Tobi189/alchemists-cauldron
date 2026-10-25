@@ -10,7 +10,8 @@ export type ShelfStock = Readonly<Record<string, number>>;
 export interface Ingredient {
   readonly id: string;
   readonly name: string;
-  readonly icon: string;
+  readonly iconUrl: string;
+  readonly sigilUrl: string;
   readonly temperature: number;
   readonly density: number;
   readonly magicPower: number;

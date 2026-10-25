@@ -24,14 +24,16 @@ const createCauldronContents = (state: GameState): HTMLElement => {
 
     const item = document.createElement('span');
     const position = document.createElement('span');
-    const icon = document.createElement('span');
+    const icon = document.createElement('img');
 
     item.className = 'cauldron__ingredient';
     position.className = 'cauldron__ingredient-position';
     icon.className = 'cauldron__ingredient-icon';
     item.title = ingredient.name;
     position.textContent = String(index + 1);
-    icon.textContent = ingredient.icon;
+    icon.src = ingredient.iconUrl;
+    icon.alt = '';
+    icon.setAttribute('aria-hidden', 'true');
     item.append(position, icon);
     contents.append(item);
   }

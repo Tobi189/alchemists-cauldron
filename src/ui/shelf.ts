@@ -19,6 +19,7 @@ const createStat = (label: string, value: number, className: string): HTMLElemen
 
 const createEmptySlot = (position: number): HTMLButtonElement => {
   const slot = document.createElement('button');
+  const side = document.createElement('span');
   const badge = document.createElement('span');
   const message = document.createElement('span');
 
@@ -27,10 +28,12 @@ const createEmptySlot = (position: number): HTMLButtonElement => {
   slot.disabled = true;
   slot.setAttribute('aria-label', `Empty ingredient slot ${position}`);
   badge.className = 'ingredient-card__stock';
+  side.className = 'ingredient-card__side';
   message.className = 'ingredient-card__empty-message';
   badge.textContent = '0';
   message.textContent = 'Empty shelf';
-  slot.append(message, badge);
+  side.append(badge);
+  slot.append(message, side);
 
   return slot;
 };
@@ -49,10 +52,12 @@ const createIngredientCard = (
   }
 
   const card = document.createElement('button');
-  const icon = document.createElement('span');
+  const icon = document.createElement('img');
   const content = document.createElement('span');
   const name = document.createElement('span');
   const stats = document.createElement('span');
+  const side = document.createElement('span');
+  const sigil = document.createElement('img');
   const badge = document.createElement('span');
 
   card.className = 'ingredient-card';
@@ -63,9 +68,15 @@ const createIngredientCard = (
   content.className = 'ingredient-card__content';
   name.className = 'ingredient-card__name';
   stats.className = 'ingredient-card__stats';
+  side.className = 'ingredient-card__side';
+  sigil.className = 'ingredient-card__sigil';
   badge.className = 'ingredient-card__stock';
-  icon.textContent = ingredient.icon;
+  icon.src = ingredient.iconUrl;
+  icon.alt = '';
   icon.setAttribute('aria-hidden', 'true');
+  sigil.src = ingredient.sigilUrl;
+  sigil.alt = '';
+  sigil.setAttribute('aria-hidden', 'true');
   name.textContent = ingredient.name;
   badge.textContent = String(stock);
   stats.append(
@@ -74,7 +85,8 @@ const createIngredientCard = (
     createStat('Magic Power', ingredient.magicPower, 'ingredient-card__stat--magic'),
   );
   content.append(name, stats);
-  card.append(icon, content, badge);
+  side.append(sigil, badge);
+  card.append(icon, content, side);
   card.addEventListener('click', () => {
     onAddIngredient(ingredient.id);
   });
