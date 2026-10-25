@@ -1,7 +1,9 @@
 import cauldronEmblemUrl from '../assets/ui/cauldron-emblem.svg';
-import cauldronFiligreeUrl from '../assets/ui/cauldron-filigree.svg';
+import ornateCauldronUrl from '../assets/ui/ornate-cauldron.webp';
+import { getDifficultySettings } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
-import type { GameState } from '../types/game.ts';
+import type { BrewResult, GameState } from '../types/game.ts';
+import { getDraggedIngredientId, isIngredientDrag } from './drag-and-drop.ts';
 
 const createCauldronContents = (state: GameState): HTMLElement => {
   const contents = document.createElement('div');
@@ -43,40 +45,102 @@ const createCauldronContents = (state: GameState): HTMLElement => {
   return contents;
 };
 
-export const createCauldron = (state: GameState): HTMLElement => {
+export const createCauldron = (
+  state: GameState,
+  onAddIngredient: (ingredientId: string) => void,
+  brewVisualFeedback: BrewResult | undefined,
+): HTMLElement => {
   const section = document.createElement('section');
   const stage = document.createElement('div');
   const glow = document.createElement('div');
   const vessel = document.createElement('div');
+  const artwork = document.createElement('img');
   const rim = document.createElement('div');
   const liquid = document.createElement('div');
   const body = document.createElement('div');
-  const filigree = document.createElement('img');
   const emblem = document.createElement('img');
-  const base = document.createElement('div');
+  const feedback = document.createElement('div');
+  const rules = getDifficultySettings(state.difficulty);
+  const canAcceptDrop =
+    state.status === 'playing' && state.cauldronIngredientIds.length < rules.cauldronCapacity;
+
+  const removeDropHighlight = (): void => {
+    stage.classList.remove('cauldron-stage--drop-target');
+  };
 
   section.className = 'cauldron-area';
   stage.className = 'cauldron-stage';
+  stage.setAttribute('aria-label', 'Cauldron drop zone');
   glow.className = 'cauldron-stage__glow';
   vessel.className = 'cauldron';
+  artwork.className = 'cauldron__artwork';
   rim.className = 'cauldron__rim';
   liquid.className = 'cauldron__liquid';
   body.className = 'cauldron__body';
-  filigree.className = 'cauldron__filigree';
   emblem.className = 'cauldron__emblem';
-  base.className = 'cauldron__base';
-  filigree.src = cauldronFiligreeUrl;
-  filigree.alt = '';
-  filigree.setAttribute('aria-hidden', 'true');
+  feedback.className = 'cauldron-feedback';
+  artwork.src = ornateCauldronUrl;
+  artwork.alt = '';
+  artwork.draggable = false;
+  artwork.setAttribute('aria-hidden', 'true');
   emblem.src = cauldronEmblemUrl;
   emblem.alt = '';
   emblem.setAttribute('aria-hidden', 'true');
+  feedback.setAttribute('aria-hidden', 'true');
+
+  if (brewVisualFeedback) {
+    stage.classList.add(`cauldron-stage--brew-${brewVisualFeedback}`);
+    feedback.classList.add(`cauldron-feedback--${brewVisualFeedback}`);
+
+    for (let particleIndex = 0; particleIndex < 8; particleIndex += 1) {
+      const particle = document.createElement('span');
+      particle.className = 'cauldron-feedback__particle';
+      particle.style.setProperty('--particle-angle', `${particleIndex * 45}deg`);
+      feedback.append(particle);
+    }
+  }
+
+  stage.addEventListener('dragover', (event) => {
+    if (!canAcceptDrop || !isIngredientDrag(event)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'copy';
+    }
+
+    stage.classList.add('cauldron-stage--drop-target');
+  });
+  stage.addEventListener('dragleave', (event) => {
+    const nextTarget = event.relatedTarget;
+
+    if (!(nextTarget instanceof Node) || !stage.contains(nextTarget)) {
+      removeDropHighlight();
+    }
+  });
+  stage.addEventListener('drop', (event) => {
+    removeDropHighlight();
+
+    if (!canAcceptDrop || !isIngredientDrag(event)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const ingredientId = getDraggedIngredientId(event);
+
+    if (ingredientId) {
+      onAddIngredient(ingredientId);
+    }
+  });
 
   liquid.append(createCauldronContents(state));
   rim.append(liquid);
-  body.append(filigree, emblem);
-  vessel.append(rim, body, base);
-  stage.append(glow, vessel);
+  body.append(emblem);
+  vessel.append(artwork, rim, body);
+  stage.append(glow, vessel, feedback);
 
   section.append(stage);
 

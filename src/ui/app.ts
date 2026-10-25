@@ -2,7 +2,7 @@ import clockIconUrl from '../assets/ui/clock.svg';
 import heartIconUrl from '../assets/ui/heart.svg';
 import scoreIconUrl from '../assets/ui/score-emblem.svg';
 import { getDifficultySettings } from '../data/difficulty.ts';
-import type { Difficulty, GameState } from '../types/game.ts';
+import type { BrewResult, Difficulty, GameState } from '../types/game.ts';
 import type { LeaderboardEntry } from '../types/leaderboard.ts';
 import { createCauldron } from './cauldron.ts';
 import {
@@ -24,6 +24,7 @@ export interface AppHandlers {
   readonly leaderboardDialog: 'closed' | 'open' | 'confirm-clear';
   readonly menuDialog: 'closed' | 'help' | 'settings';
   readonly leaderboardNotice: string | undefined;
+  readonly brewVisualFeedback: BrewResult | undefined;
   readonly shouldRequestPlayerName: boolean;
   readonly hasSavedGame: boolean;
   readonly onStartGame: () => void;
@@ -45,6 +46,7 @@ export interface AppHandlers {
   readonly onExitToMenu: () => void;
   readonly onAddIngredient: (ingredientId: string) => void;
   readonly onBrew: () => void;
+  readonly onPourOut: () => void;
 }
 
 const formatTime = (totalSeconds: number): string => {
@@ -82,7 +84,7 @@ const createTimerHud = (state: GameState): HTMLElement => {
   const rules = getDifficultySettings(state.difficulty);
   const progressPercentage = (state.timeLeft / rules.startingTimeSeconds) * 100;
 
-  timer.className = 'hud__timer';
+  timer.className = 'hud__plaque hud__timer';
   progress.className = 'hud__timer-progress';
   fill.className = 'hud__timer-fill';
   progress.setAttribute('role', 'progressbar');
@@ -112,27 +114,32 @@ const createHeader = (state: GameState): HTMLElement => {
   const time = createTimerHud(state);
 
   const lives = document.createElement('div');
+  const livesLabel = document.createElement('span');
 
   header.className = 'game-header';
   frame.className = 'game-header__frame';
   hud.className = 'game-header__hud';
-  score.classList.add('hud__score');
+  score.classList.add('hud__plaque', 'hud__score');
   titleGroup.className = 'game-header__title-group';
   title.className = 'game-header__title';
   title.textContent = "Alchemist's Cauldron";
+  livesLabel.textContent = 'Lives';
   titleGroup.append(title);
 
   if (state.status === 'menu') {
-    lives.className = 'hud__lives hud__lives--empty';
-    lives.setAttribute('aria-hidden', 'true');
+    const dormantValue = document.createElement('strong');
+
+    lives.className = 'hud__plaque hud__lives hud__lives--empty';
+    livesLabel.className = 'hud__label';
+    dormantValue.className = 'hud__value hud__value--dormant';
+    dormantValue.textContent = '—';
+    lives.append(livesLabel, dormantValue);
   } else {
-    const livesLabel = document.createElement('span');
     const hearts = document.createElement('span');
 
-    lives.className = 'hud__lives';
+    lives.className = 'hud__plaque hud__lives';
     livesLabel.className = 'visually-hidden';
     hearts.className = 'hud__hearts';
-    livesLabel.textContent = 'Lives';
     hearts.setAttribute('aria-label', `${state.lives} lives remaining`);
 
     for (let life = 0; life < state.lives; life += 1) {
@@ -162,7 +169,7 @@ export const renderApp = (
   const shell = document.createElement('main');
   const board = document.createElement('div');
   const shelf = createShelf(state, handlers.onAddIngredient);
-  const cauldron = createCauldron(state);
+  const cauldron = createCauldron(state, handlers.onAddIngredient, handlers.brewVisualFeedback);
   const recipe = createRecipePanel(state);
   const parameterBars = createParameterBars(state);
   const gameControls = createGameControls(
@@ -171,6 +178,7 @@ export const renderApp = (
     handlers.onContinueGame,
     handlers.hasSavedGame,
     handlers.onBrew,
+    handlers.onPourOut,
     handlers.onOpenLeaderboard,
     handlers.onOpenHelp,
     handlers.onOpenSettings,
@@ -227,6 +235,10 @@ export const renderApp = (
 
   if (state.status === 'paused') {
     shell.classList.add('game-shell--paused');
+  }
+
+  if (handlers.brewVisualFeedback) {
+    shell.classList.add(`game-shell--brew-${handlers.brewVisualFeedback}`);
   }
   board.className = 'game-board';
   footer.className = 'game-footer';

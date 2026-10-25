@@ -1,10 +1,11 @@
 import { DIFFICULTIES, getDifficultySettings } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
+import { getReactionsForDifficulty } from '../data/reactions.ts';
 import { RECIPES } from '../data/recipes.ts';
 import type { Difficulty, GameState, Recipe, ShelfStock } from '../types/game.ts';
 
 const SAVE_STORAGE_KEY = 'alchemists-cauldron:saved-game';
-const SAVE_VERSION = 1;
+const SAVE_VERSION = 2;
 
 interface SavedGame {
   readonly version: number;
@@ -13,6 +14,8 @@ interface SavedGame {
   readonly timeLeft: number;
   readonly lives: number;
   readonly activeRecipe: Recipe;
+  readonly enabledReactionIds: readonly string[];
+  readonly lastReactionIds: readonly string[];
   readonly cauldronIngredients: readonly string[];
   readonly shelfStock: ShelfStock;
   readonly status: 'playing' | 'paused';
@@ -91,6 +94,45 @@ const parseCauldronIngredients = (
     : undefined;
 };
 
+const parseEnabledReactionIds = (
+  value: unknown,
+  difficulty: Difficulty,
+  expectedCount: number,
+): readonly string[] | undefined => {
+  if (!Array.isArray(value) || value.length !== expectedCount) {
+    return undefined;
+  }
+
+  const validIds = new Set(getReactionsForDifficulty(difficulty).map((reaction) => reaction.id));
+  const reactionIds = value.filter(
+    (reactionId): reactionId is string =>
+      typeof reactionId === 'string' && validIds.has(reactionId),
+  );
+
+  return reactionIds.length === expectedCount && new Set(reactionIds).size === expectedCount
+    ? reactionIds
+    : undefined;
+};
+
+const parseLastReactionIds = (
+  value: unknown,
+  enabledReactionIds: readonly string[],
+): readonly string[] | undefined => {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const enabledIds = new Set(enabledReactionIds);
+  const reactionIds = value.filter(
+    (reactionId): reactionId is string =>
+      typeof reactionId === 'string' && enabledIds.has(reactionId),
+  );
+
+  return reactionIds.length === value.length && new Set(reactionIds).size === reactionIds.length
+    ? reactionIds
+    : undefined;
+};
+
 const parseSavedGame = (value: unknown): GameState | undefined => {
   if (!isRecord(value) || value.version !== SAVE_VERSION || !isDifficulty(value.difficulty)) {
     return undefined;
@@ -101,9 +143,24 @@ const parseSavedGame = (value: unknown): GameState | undefined => {
   const activeRecipe = getCanonicalRecipe(value.activeRecipe, difficulty);
   const shelfStock = parseShelfStock(value.shelfStock, difficulty);
   const cauldronIngredientIds = parseCauldronIngredients(value.cauldronIngredients, difficulty);
+  const enabledReactionIds = parseEnabledReactionIds(
+    value.enabledReactionIds,
+    difficulty,
+    rules.reactionCount,
+  );
+  const lastReactionIds = enabledReactionIds
+    ? parseLastReactionIds(value.lastReactionIds, enabledReactionIds)
+    : undefined;
   const hasValidStatus = value.status === 'playing' || value.status === 'paused';
 
-  if (!hasValidStatus || !activeRecipe || !shelfStock || !cauldronIngredientIds) {
+  if (
+    !hasValidStatus ||
+    !activeRecipe ||
+    !shelfStock ||
+    !cauldronIngredientIds ||
+    !enabledReactionIds ||
+    !lastReactionIds
+  ) {
     return undefined;
   }
 
@@ -129,6 +186,8 @@ const parseSavedGame = (value: unknown): GameState | undefined => {
     gameOverReason: undefined,
     activeRecipe,
     lastBrewResult: undefined,
+    enabledReactionIds,
+    lastReactionIds,
     shelfStock,
     cauldronIngredientIds,
     previousCauldronIngredientIds: cauldronIngredientIds,
@@ -152,6 +211,8 @@ export const didSaveGame = (state: GameState): boolean => {
     timeLeft: state.timeLeft,
     lives: state.lives,
     activeRecipe: state.activeRecipe,
+    enabledReactionIds: state.enabledReactionIds,
+    lastReactionIds: state.lastReactionIds,
     cauldronIngredients: state.cauldronIngredientIds,
     shelfStock: state.shelfStock,
     status: state.status,
