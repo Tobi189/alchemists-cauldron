@@ -1,7 +1,7 @@
 import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import type { GameState } from '../types/game.ts';
 import { createCauldron } from './cauldron.ts';
-import { createGameOverDialog } from './dialogs.ts';
+import { createGameOverDialog, createPauseDialog } from './dialogs.ts';
 import { createParameterBars } from './parameter-bars.ts';
 import { createRecipePanel } from './recipe.ts';
 import { createShelf } from './shelf.ts';
@@ -9,6 +9,9 @@ import { createShelf } from './shelf.ts';
 export interface AppHandlers {
   readonly onStartGame: () => void;
   readonly onPlayAgain: () => void;
+  readonly onPause: () => void;
+  readonly onResume: () => void;
+  readonly onExitToMenu: () => void;
   readonly onAddIngredient: (ingredientId: string) => void;
   readonly onBrew: () => void;
 }
@@ -62,7 +65,7 @@ const createTimerHud = (state: GameState): HTMLElement => {
   return timer;
 };
 
-const createHeader = (state: GameState): HTMLElement => {
+const createHeader = (state: GameState, onPause: () => void): HTMLElement => {
   const header = document.createElement('header');
   const score = createHudItem('Score', String(state.score));
   const titleGroup = document.createElement('div');
@@ -97,6 +100,16 @@ const createHeader = (state: GameState): HTMLElement => {
     rightHud.append(lives);
   }
 
+  if (state.status === 'playing') {
+    const pauseButton = document.createElement('button');
+
+    pauseButton.className = 'secondary-action hud__pause';
+    pauseButton.type = 'button';
+    pauseButton.textContent = 'Pause';
+    pauseButton.addEventListener('click', onPause);
+    rightHud.append(pauseButton);
+  }
+
   header.append(score, titleGroup, rightHud);
 
   return header;
@@ -115,13 +128,23 @@ export const renderApp = (
   const parameterBars = createParameterBars(state);
   const footer = document.createElement('footer');
   const gameOverDialog = createGameOverDialog(state, handlers.onPlayAgain);
+  const pauseDialog = createPauseDialog(state, handlers.onResume, handlers.onExitToMenu);
 
   shell.className = 'game-shell';
+  shell.inert = state.status === 'paused';
+
+  if (state.status === 'paused') {
+    shell.classList.add('game-shell--paused');
+  }
   board.className = 'game-board';
   footer.className = 'game-footer';
   footer.textContent = 'Choose ingredients carefully. Every portion is spent.';
 
   board.append(shelf, cauldron, recipe);
-  shell.append(createHeader(state), board, parameterBars, footer);
-  container.replaceChildren(shell, ...(gameOverDialog ? [gameOverDialog] : []));
+  shell.append(createHeader(state, handlers.onPause), board, parameterBars, footer);
+  container.replaceChildren(
+    shell,
+    ...(pauseDialog ? [pauseDialog] : []),
+    ...(gameOverDialog ? [gameOverDialog] : []),
+  );
 };
