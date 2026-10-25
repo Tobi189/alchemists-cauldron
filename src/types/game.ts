@@ -49,6 +49,20 @@ export interface Recipe {
   readonly magicPower: RecipeRange;
 }
 
+export type ReactionType = 'ingredients' | 'stats' | 'mix';
+
+export interface Reaction {
+  readonly id: string;
+  readonly name: string;
+  readonly type: ReactionType;
+  readonly requiredIngredientIds: readonly string[];
+  readonly isActive: (ingredientIds: readonly string[], values: ParameterValues) => boolean;
+  readonly apply: (values: ParameterValues) => ParameterValues;
+  readonly timePenaltySeconds: number;
+  readonly lifePenalty: number;
+  readonly clearsCauldron: boolean;
+}
+
 export interface GameState {
   readonly difficulty: Difficulty;
   readonly status: GameStatus;
@@ -59,6 +73,8 @@ export interface GameState {
   readonly gameOverReason: GameOverReason | undefined;
   readonly activeRecipe: Recipe | undefined;
   readonly lastBrewResult: BrewResult | undefined;
+  readonly enabledReactionIds: readonly string[];
+  readonly lastReactionIds: readonly string[];
   readonly shelfStock: ShelfStock;
   readonly cauldronIngredientIds: readonly string[];
   readonly previousCauldronIngredientIds: readonly string[];

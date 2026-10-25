@@ -1107,6 +1107,13 @@ button {
   text-shadow: 0 0 0.55rem rgba(#e33b2c, 0.35);
 }
 
+.game-controls__status--reaction {
+  color: $gold-light;
+  font-style: normal;
+  font-weight: 700;
+  text-shadow: 0 0 0.65rem rgba($gold, 0.55);
+}
+
 .recipe-panel {
   display: grid;
   min-height: 30rem;
