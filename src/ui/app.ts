@@ -8,6 +8,7 @@ import {
   createLeaderboardDialog,
   createPauseDialog,
 } from './dialogs.ts';
+import { createGameControls } from './game-controls.ts';
 import { createParameterBars } from './parameter-bars.ts';
 import { createRecipePanel } from './recipe.ts';
 import { createShelf } from './shelf.ts';
@@ -81,15 +82,20 @@ const createTimerHud = (state: GameState): HTMLElement => {
   return timer;
 };
 
-const createHeader = (state: GameState, onPause: () => void): HTMLElement => {
+const createHeader = (state: GameState): HTMLElement => {
   const header = document.createElement('header');
+  const hud = document.createElement('div');
   const score = createHudItem('Score', String(state.score));
   const titleGroup = document.createElement('div');
   const eyebrow = document.createElement('span');
   const title = document.createElement('h1');
   const time = createTimerHud(state);
 
+  const lives = document.createElement('div');
+
   header.className = 'game-header';
+  hud.className = 'game-header__hud';
+  score.classList.add('hud__score');
   titleGroup.className = 'game-header__title-group';
   eyebrow.className = 'game-header__eyebrow';
   title.className = 'game-header__title';
@@ -97,12 +103,10 @@ const createHeader = (state: GameState, onPause: () => void): HTMLElement => {
   title.textContent = "Alchemist's Cauldron";
   titleGroup.append(eyebrow, title);
 
-  const rightHud = document.createElement('div');
-  rightHud.className = 'hud__right';
-  rightHud.append(time);
-
-  if (state.status !== 'menu') {
-    const lives = document.createElement('div');
+  if (state.status === 'menu') {
+    lives.className = 'hud__lives hud__lives--empty';
+    lives.setAttribute('aria-hidden', 'true');
+  } else {
     const livesLabel = document.createElement('span');
     const hearts = document.createElement('span');
 
@@ -113,20 +117,10 @@ const createHeader = (state: GameState, onPause: () => void): HTMLElement => {
     hearts.textContent = '♥'.repeat(state.lives);
     hearts.setAttribute('aria-label', `${state.lives} lives remaining`);
     lives.append(livesLabel, hearts);
-    rightHud.append(lives);
   }
 
-  if (state.status === 'playing') {
-    const pauseButton = document.createElement('button');
-
-    pauseButton.className = 'secondary-action hud__pause';
-    pauseButton.type = 'button';
-    pauseButton.textContent = 'Pause';
-    pauseButton.addEventListener('click', onPause);
-    rightHud.append(pauseButton);
-  }
-
-  header.append(score, titleGroup, rightHud);
+  hud.append(score, time, lives);
+  header.append(hud, titleGroup);
 
   return header;
 };
@@ -139,14 +133,16 @@ export const renderApp = (
   const shell = document.createElement('main');
   const board = document.createElement('div');
   const shelf = createShelf(state, handlers.onAddIngredient);
-  const cauldron = createCauldron(
+  const cauldron = createCauldron(state);
+  const recipe = createRecipePanel(state);
+  const parameterBars = createParameterBars(state);
+  const gameControls = createGameControls(
     state,
     handlers.onStartGame,
     handlers.onBrew,
     handlers.onOpenLeaderboard,
+    handlers.onPause,
   );
-  const recipe = createRecipePanel(state);
-  const parameterBars = createParameterBars(state);
   const footer = document.createElement('footer');
   const gameOverDialog =
     handlers.leaderboardDialog === 'closed'
@@ -190,7 +186,7 @@ export const renderApp = (
   footer.textContent = 'Choose ingredients carefully. Every portion is spent.';
 
   board.append(shelf, cauldron, recipe);
-  shell.append(createHeader(state, handlers.onPause), board, parameterBars, footer);
+  shell.append(createHeader(state), board, parameterBars, gameControls, footer);
   container.replaceChildren(
     shell,
     ...(pauseDialog ? [pauseDialog] : []),
