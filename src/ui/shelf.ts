@@ -2,6 +2,7 @@ import { getDifficultySettings } from '../data/difficulty.ts';
 import { INGREDIENTS } from '../data/ingredients.ts';
 import type { GameState, Ingredient } from '../types/game.ts';
 import { didStartIngredientDrag } from './drag-and-drop.ts';
+import { createIngredientTooltip } from './ingredient-tooltip.ts';
 
 const formatModifier = (value: number): string =>
   value > 0 ? `+${value}` : String(value).replace('-', '−');
@@ -52,6 +53,7 @@ const createIngredientCard = (
     return createEmptySlot(position);
   }
 
+  const isTooltipEnabled = state.difficulty === 'hard';
   const card = document.createElement('button');
   const icon = document.createElement('img');
   const content = document.createElement('span');
@@ -62,6 +64,7 @@ const createIngredientCard = (
   const badge = document.createElement('span');
 
   card.className = 'ingredient-card';
+  card.classList.toggle('ingredient-card--tooltip', isTooltipEnabled);
   card.type = 'button';
   card.disabled = isShelfBlocked;
   card.draggable = !isShelfBlocked;
@@ -83,14 +86,22 @@ const createIngredientCard = (
   sigil.setAttribute('aria-hidden', 'true');
   name.textContent = ingredient.name;
   badge.textContent = String(stock);
-  stats.append(
-    createStat('Temperature', ingredient.temperature, 'ingredient-card__stat--temperature'),
-    createStat('Density', ingredient.density, 'ingredient-card__stat--density'),
-    createStat('Magic Power', ingredient.magicPower, 'ingredient-card__stat--magic'),
-  );
-  content.append(name, stats);
-  side.append(sigil, badge);
-  card.append(icon, content, side);
+  if (isTooltipEnabled) {
+    const tooltip = createIngredientTooltip(ingredient, card);
+    card.setAttribute('aria-describedby', tooltip.id);
+    content.append(name);
+    side.append(badge);
+    card.append(icon, content, side, tooltip);
+  } else {
+    stats.append(
+      createStat('Temperature', ingredient.temperature, 'ingredient-card__stat--temperature'),
+      createStat('Density', ingredient.density, 'ingredient-card__stat--density'),
+      createStat('Magic Power', ingredient.magicPower, 'ingredient-card__stat--magic'),
+    );
+    content.append(name, stats);
+    side.append(sigil, badge);
+    card.append(icon, content, side);
+  }
   card.addEventListener('click', () => {
     onAddIngredient(ingredient.id);
   });

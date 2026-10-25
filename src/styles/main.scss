@@ -401,6 +401,135 @@ button {
   transform: scale(0.98);
 }
 
+.ingredient-card--tooltip {
+  position: relative;
+  overflow: visible;
+
+  &:hover,
+  &:focus-visible {
+    z-index: 30;
+
+    .ingredient-tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translate(0, -50%);
+    }
+
+    .ingredient-tooltip--left {
+      transform: translate(0, -50%);
+    }
+
+    .ingredient-tooltip--up {
+      transform: translateY(0);
+    }
+  }
+}
+
+.ingredient-tooltip {
+  position: absolute;
+  z-index: 100;
+  top: 50%;
+  left: calc(100% + 0.75rem);
+  display: grid;
+  gap: 0.38rem;
+  width: max-content;
+  min-width: 12rem;
+  max-width: min(16rem, calc(100vw - 1.5rem));
+  padding: 0.75rem;
+  border: 1px solid rgba($gold-light, 0.86);
+  border-radius: 0.4rem;
+  visibility: hidden;
+  color: #f4ecd5;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 0, rgba($magic, 0.12), transparent 55%),
+    linear-gradient(160deg, #1d241d, #070a08 72%);
+  box-shadow:
+    inset 0 0 0 2px rgba(#000, 0.52),
+    0 0.8rem 1.5rem rgba(#000, 0.72),
+    0 0 0.8rem rgba($gold, 0.22);
+  opacity: 0;
+  transform: translate(-0.35rem, -50%);
+  transition:
+    opacity 130ms ease,
+    transform 130ms ease,
+    visibility 130ms ease;
+}
+
+.ingredient-tooltip--left {
+  right: calc(100% + 0.75rem);
+  left: auto;
+  transform: translate(0.35rem, -50%);
+}
+
+.ingredient-tooltip--up {
+  top: auto;
+  bottom: 0;
+  transform: translateY(0.35rem);
+}
+
+.ingredient-tooltip__title {
+  padding-bottom: 0.38rem;
+  border-bottom: 1px solid rgba($gold, 0.38);
+  color: $gold-light;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ingredient-tooltip__row {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+
+  strong {
+    color: currentcolor;
+  }
+}
+
+.ingredient-tooltip__row--temperature {
+  color: $temperature;
+}
+
+.ingredient-tooltip__row--density {
+  color: $density;
+}
+
+.ingredient-tooltip__row--magic {
+  color: $arcane;
+}
+
+.game-shell--paused .ingredient-tooltip {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .ingredient-tooltip,
+  .ingredient-tooltip--left {
+    top: calc(100% + 0.4rem);
+    right: auto;
+    bottom: auto;
+    left: 0;
+    width: 100%;
+    min-width: 0;
+    transform: translateY(-0.3rem);
+  }
+
+  .ingredient-tooltip--up {
+    top: auto;
+    bottom: calc(100% + 0.4rem);
+    transform: translateY(0.3rem);
+  }
+
+  .ingredient-card--tooltip:hover .ingredient-tooltip,
+  .ingredient-card--tooltip:focus-visible .ingredient-tooltip {
+    transform: translateY(0);
+  }
+}
+
 .ingredient-card--empty {
   cursor: not-allowed;
   opacity: 0.38;
