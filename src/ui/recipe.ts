@@ -1,17 +1,31 @@
+import densityIconUrl from '../assets/ui/density.svg';
+import magicIconUrl from '../assets/ui/magic.svg';
+import potionSketchUrl from '../assets/ui/potion-sketch.svg';
+import temperatureIconUrl from '../assets/ui/temperature.svg';
 import { LEVEL_ONE_RULES } from '../data/difficulty.ts';
 import type { GameState, RecipeRange } from '../types/game.ts';
 
 const formatRange = (range: RecipeRange): string => `${range.min}–${range.max}`;
 
-const createRangeRow = (label: string, value: string, className: string): HTMLElement => {
+const createRangeRow = (
+  label: string,
+  value: string,
+  className: string,
+  iconUrl: string,
+): HTMLElement => {
   const row = document.createElement('div');
+  const icon = document.createElement('img');
   const rowLabel = document.createElement('span');
   const rowValue = document.createElement('strong');
 
   row.className = `recipe-panel__range ${className}`;
+  icon.className = 'recipe-panel__range-icon';
+  icon.src = iconUrl;
+  icon.alt = '';
+  icon.setAttribute('aria-hidden', 'true');
   rowLabel.textContent = label;
   rowValue.textContent = value;
-  row.append(rowLabel, rowValue);
+  row.append(icon, rowLabel, rowValue);
 
   return row;
 };
@@ -20,6 +34,7 @@ export const createRecipePanel = (state: GameState): HTMLElement => {
   const panel = document.createElement('aside');
   const eyebrow = document.createElement('p');
   const title = document.createElement('h2');
+  const sketch = document.createElement('img');
   const content = document.createElement('div');
   const counter = document.createElement('p');
   const count = state.cauldronIngredientIds.length;
@@ -27,6 +42,10 @@ export const createRecipePanel = (state: GameState): HTMLElement => {
   panel.className = 'recipe-panel';
   eyebrow.className = 'recipe-panel__eyebrow';
   title.className = 'recipe-panel__title';
+  sketch.className = 'recipe-panel__sketch';
+  sketch.src = potionSketchUrl;
+  sketch.alt = '';
+  sketch.setAttribute('aria-hidden', 'true');
   content.className = 'recipe-panel__content';
   counter.className = 'recipe-panel__counter';
   eyebrow.textContent = 'Current Recipe';
@@ -40,16 +59,19 @@ export const createRecipePanel = (state: GameState): HTMLElement => {
         'Temperature',
         formatRange(state.activeRecipe.temperature),
         'recipe-panel__range--temperature',
+        temperatureIconUrl,
       ),
       createRangeRow(
         'Density',
         formatRange(state.activeRecipe.density),
         'recipe-panel__range--density',
+        densityIconUrl,
       ),
       createRangeRow(
         'Magic Power',
         formatRange(state.activeRecipe.magicPower),
         'recipe-panel__range--magic',
+        magicIconUrl,
       ),
     );
   } else {
@@ -64,7 +86,7 @@ export const createRecipePanel = (state: GameState): HTMLElement => {
     counter.classList.add('recipe-panel__counter--full');
   }
 
-  panel.append(eyebrow, title, content, counter);
+  panel.append(eyebrow, title, sketch, content, counter);
 
   return panel;
 };
